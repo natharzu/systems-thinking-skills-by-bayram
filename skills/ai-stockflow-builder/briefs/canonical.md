@@ -61,13 +61,19 @@ A SINGLE HTML file named `model.html`. No build step, no npm install. React via 
 |  <<title>>                                    |
 +-----------------------------------------------+
 |  [SVG diagram: stocks as boxes,               |
-|   flows as arrows with labels]                |
+|   flows as arrows with labels,                |
+|   information links as dashed arrows ↓        |
+|   from each stock referenced in a flow's eq]  |
 +-----------------------------------------------+
-|  [Recharts LineChart of primary stock         |
-|   over time, plus secondary stock dashed]     |
+|  Δ at t=0  ·  Equilibrium  ·  At t=horizon    |
++-----------------------------------------------+
+|  [LineChart: primary stock + dashed eq line   |
+|   plus secondary stocks dashed]               |
 +-----------------------------------------------+
 |  Slider: <<ParamName1>> [——●——] 50            |
+|         leverage-chip · Meadows #11           |
 |  Slider: <<ParamName2>> [——●——] 4             |
+|         leverage-chip · Meadows #9            |
 |  ...                                          |
 +-----------------------------------------------+
 |  Equation chips (one per flow):               |
@@ -86,6 +92,26 @@ A SINGLE HTML file named `model.html`. No build step, no npm install. React via 
 7. **No external state, no localStorage, no URL params.** This is a single-screen tool. Sharing comes later.
 8. **Equation chips show the literal equation string from MY MODEL.** They are read-only; this is the human-readable proof that the code matches the spec. Render in modeler-friendly notation if possible — e.g., `Resolutions = min(Backlog, agents(t) * Throughput)` with a side-note `agents(t) = StartAgents if t < HireWeek else EndAgents`. Avoid raw JS ternaries in chip text if a clearer form exists.
 9. **Companion test files allowed.** You may produce one `test_sim.{mjs,js}` file (or similar) that imports/inlines the simulation logic and asserts the extraction-test value. Do NOT produce alternate `model.html` variants (no Vite version, no Vue version).
+
+## Pedagogical UI elements (MANDATORY — Sterman/Forrester/Meadows)
+
+These ride alongside the chart and sliders to teach systems-thinking concepts, not just simulate. Implement all five — they are the difference between a flow simulator and a system-dynamics teaching tool.
+
+1. **Information links in the diagram (Forrester).** When a flow's rate equation references a stock, draw a dashed line with arrowhead from that stock to the flow. Use a muted neutral color (e.g., `#94A3B8`). Without info links, balancing/reinforcing loops are invisible. This is the difference between drawing a flow diagram and drawing a system-dynamics diagram.
+
+2. **Leverage-point chip on each slider (Meadows).** A small pill beside each parameter slider showing the parameter's Meadows leverage classification. Heuristic from the equation context:
+   - If the parameter appears in a flow expression that ALSO references a stock (e.g., `Stock / Param`, `Stock * Param`) → "delay / rate constant · Meadows #9"
+   - Otherwise (constant flow rate, parameter alone or with constants only) → "flow rate · Meadows #11"
+   - If the parameter name semantically encodes a target (`*Goal`, `*Target`, `*Quota`, `*Capacity` used as a goal) → "goal · Meadows #3"
+   This converts mechanism-learning into leverage-learning. Do not skip it.
+
+3. **Equilibrium reference line on the chart (Sterman).** Simulate to ~5× horizon (or 100 steps, whichever is greater). If the trajectory converges (last-step relative change < 0.001 and value finite), draw a dashed horizontal line at the asymptotic value, labeled "eq <value>". Use a distinct muted color (e.g., `#8B5CF6` purple). If trajectory does not converge, hide the line and mark equilibrium as "unbounded / non-convergent" in the readout. Adjust y-axis so the equilibrium line is visible.
+
+4. **Δ at t=0 readout (Sterman).** Above the chart, show "Δ at t=0: ±N <stock-units>/<time-unit>" — the net flow at the initial state. The change is the lesson, not the level. This is the *tilt of the bath* in Sterman's pedagogy.
+
+5. **Terminal stock readout (Sterman).** Show stock value at t=horizon alongside the equilibrium readout. Lets users compare "where did we end up over the simulated window" vs "where this is heading."
+
+These five are non-negotiable. Implement them; do not ask whether to skip any.
 
 ## Stack
 

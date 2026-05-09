@@ -7,7 +7,7 @@
 <style>
   :root {
     --bg1:#0B1120; --bg2:#0F172A; --bg3:#1E293B;
-    --cyan:#06B6D4; --orange:#F97316; --green:#10B981; --red:#EF4444;
+    --cyan:#06B6D4; --orange:#F97316; --green:#10B981; --red:#EF4444; --purple:#8B5CF6;
     --fg:#F1F5F9; --dim:#94A3B8; --rule:#334155;
   }
   * { box-sizing: border-box; }
@@ -19,23 +19,22 @@
   .ref { color: #CBD5E1; font-size: 13px; margin-bottom: 18px; padding: 12px 14px; background: var(--bg2); border-left: 3px solid var(--dim); border-radius: 4px; }
   .ref strong { color: var(--fg); }
   .panel { background: var(--bg3); padding: 18px; border-radius: 8px; margin-bottom: 14px; }
-  .diagram { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
-  .stock-box { background:var(--bg2); border:2px solid var(--cyan); padding:14px 22px; border-radius:6px; min-width:160px; text-align:center; }
-  .stock-box .name { font-weight:600; font-size:15px; color:var(--fg); }
-  .stock-box .val { font-family: ui-monospace, "JetBrains Mono", "SF Mono", monospace; font-size:22px; color:var(--cyan); margin-top:4px; }
-  .stock-box .units { font-size:11px; color:var(--dim); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
-  .flow-arrow { font-size:13px; color:var(--dim); text-align:center; min-width:140px; padding: 0 8px; }
-  .flow-arrow .name { font-weight:600; color:var(--orange); font-size:13px; }
-  .flow-arrow .arrow { font-size: 22px; color: var(--orange); margin: 4px 0; }
-  .flow-arrow .expr { font-family: ui-monospace, monospace; font-size:11px; color:var(--dim); margin-top:2px; }
-  .cloud { font-size: 22px; color: var(--dim); }
+  .diagram-panel { padding: 8px 18px; }
+  .diagram-svg { display: block; width: 100%; height: auto; max-height: 220px; }
+  .readouts { display: flex; gap: 18px; flex-wrap: wrap; padding: 12px 18px; }
+  .readout { font-size: 13px; color: var(--dim); }
+  .readout-label { color: var(--dim); margin-right: 6px; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; }
+  .readout-val { color: var(--fg); font-family: ui-monospace, "JetBrains Mono", monospace; font-weight: 600; }
+  .readout-val.eq { color: var(--purple); }
+  .readout-val.delta { color: var(--cyan); }
   canvas { display:block; width:100%; max-width:880px; height:280px; background:transparent; }
-  .slider-row { display:flex; align-items:center; gap:14px; padding: 11px 0; border-bottom: 1px solid var(--bg2); }
+  .slider-row { display:flex; align-items:center; gap:14px; padding: 11px 0; border-bottom: 1px solid var(--bg2); flex-wrap: wrap; }
   .slider-row:first-child { padding-top:4px; }
   .slider-row:last-child { border-bottom:none; padding-bottom:4px; }
-  .slider-row .lbl { min-width: 170px; font-size: 13px; }
+  .slider-row .lbl { min-width: 200px; flex: 0 0 auto; font-size: 13px; }
   .slider-row .lbl .units { color: var(--dim); font-size: 11px; display:block; }
-  .slider-row input[type=range] { flex:1; accent-color: var(--cyan); }
+  .slider-row .lbl .leverage { display:inline-block; margin-top:3px; padding: 2px 7px; font-size: 10px; letter-spacing: 0.3px; background: rgba(139,92,246,0.10); color: var(--purple); border-radius: 3px; font-weight: 500; }
+  .slider-row input[type=range] { flex:1; min-width: 120px; accent-color: var(--cyan); }
   .slider-row .val { min-width: 80px; text-align: right; font-family: ui-monospace, monospace; color: var(--cyan); font-size: 14px; }
   .chip { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 13px; padding: 9px 12px; background: var(--bg2); border-radius: 4px; margin: 6px 0; color: #E2E8F0; }
   .chip .flow-name { color: var(--orange); font-weight: 600; }
@@ -45,10 +44,7 @@
   .fail-mark { color: var(--red); font-weight: 600; }
   .footer { color: var(--dim); font-size: 11px; margin-top: 20px; text-align: center; }
   @media (max-width: 600px) {
-    .diagram { gap: 4px; }
-    .stock-box { padding: 12px 14px; min-width: 120px; }
-    .flow-arrow { min-width: 100px; }
-    .slider-row .lbl { min-width: 130px; }
+    .slider-row .lbl { min-width: 0; flex: 1 1 100%; }
   }
 </style>
 </head>
@@ -59,7 +55,49 @@
   <div class="subtitle" id="subtitle"></div>
   <div class="ref"><strong>Reference mode:</strong> <span id="ref-mode"></span></div>
 
-  <div class="panel diagram" id="diagram"></div>
+  <div class="panel diagram-panel">
+    <svg class="diagram-svg" id="diagram-svg" viewBox="0 0 920 220" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#F97316"/>
+        </marker>
+        <marker id="arr-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/>
+        </marker>
+      </defs>
+
+      <text id="src-cloud" x="60" y="115" font-size="36" fill="#94A3B8" text-anchor="middle" display="none">☁</text>
+
+      <g id="inflow-g" display="none">
+        <text id="inflow-name" x="200" y="68" font-size="13" fill="#F97316" text-anchor="middle" font-weight="600"></text>
+        <line x1="100" y1="105" x2="295" y2="105" stroke="#F97316" stroke-width="2.5" marker-end="url(#arr-orange)"/>
+        <text id="inflow-expr" x="200" y="128" font-size="11" fill="#94A3B8" text-anchor="middle" font-family="ui-monospace, monospace"></text>
+      </g>
+
+      <rect x="320" y="65" width="200" height="80" fill="#0F172A" stroke="#06B6D4" stroke-width="2" rx="6"/>
+      <text id="stock-name-svg" x="420" y="88" font-size="15" fill="#F1F5F9" text-anchor="middle" font-weight="600"></text>
+      <text id="stock-val" x="420" y="116" font-size="22" fill="#06B6D4" text-anchor="middle" font-family="ui-monospace, monospace"></text>
+      <text id="stock-units-svg" x="420" y="135" font-size="10" fill="#94A3B8" text-anchor="middle" letter-spacing="0.5"></text>
+
+      <g id="outflow-g" display="none">
+        <text id="outflow-name" x="640" y="68" font-size="13" fill="#F97316" text-anchor="middle" font-weight="600"></text>
+        <line x1="525" y1="105" x2="755" y2="105" stroke="#F97316" stroke-width="2.5" marker-end="url(#arr-orange)"/>
+        <text id="outflow-expr" x="640" y="128" font-size="11" fill="#94A3B8" text-anchor="middle" font-family="ui-monospace, monospace"></text>
+      </g>
+
+      <text id="snk-cloud" x="800" y="115" font-size="36" fill="#94A3B8" text-anchor="middle" display="none">☁</text>
+
+      <path id="inflow-info-link" d="M 380 60 Q 290 25 200 78" fill="none" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr-info)" display="none"/>
+      <path id="outflow-info-link" d="M 460 150 Q 560 195 640 138" fill="none" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr-info)" display="none"/>
+    </svg>
+  </div>
+
+  <div class="readouts">
+    <div class="readout"><span class="readout-label">Δ at t=0</span><span class="readout-val delta" id="delta-readout">—</span></div>
+    <div class="readout"><span class="readout-label">Equilibrium</span><span class="readout-val eq" id="equilibrium-readout">—</span></div>
+    <div class="readout"><span class="readout-label">At t=horizon</span><span class="readout-val" id="terminal-readout">—</span></div>
+  </div>
+
   <div class="panel"><canvas id="chart"></canvas></div>
   <div class="panel" id="sliders"></div>
   <div class="panel" id="chips"></div>
@@ -178,11 +216,27 @@ function compileExpr(expr, allowedNames) {
   return (scope) => evalAst(ast, scope);
 }
 
-// Build allowed names: stock + params
-const allowedNames = new Set([SPEC.stock.name, ...SPEC.params.map(p => p.name)]);
-const flowFns = SPEC.flows.map(f => ({ ...f, fn: compileExpr(f.expression, allowedNames) }));
+// Identifiers each flow expression references — for info-link detection
+function exprIdentifiers(expr) {
+  return new Set(tokenize(expr).filter(t => t.type === 'id').map(t => t.value));
+}
 
-// ---- UI rendering ----
+const allowedNames = new Set([SPEC.stock.name, ...SPEC.params.map(p => p.name)]);
+const flowFns = SPEC.flows.map(f => ({ ...f, fn: compileExpr(f.expression, allowedNames), refs: exprIdentifiers(f.expression) }));
+
+// ---- Meadows leverage classification ----
+// Heuristic for Pass 1's restricted grammar:
+// - Param appears in a flow expression that ALSO references the stock (e.g., Stock/P, Stock*P) → delay/rate constant (#9, medium leverage)
+// - Param appears alone or only with other params/numbers → flow rate (#11, low leverage)
+function classifyParam(paramName) {
+  for (const flow of flowFns) {
+    if (flow.refs.has(paramName) && flow.refs.has(SPEC.stock.name)) {
+      return { id: 9, label: 'delay / rate constant · Meadows #9' };
+    }
+  }
+  return { id: 11, label: 'flow rate · Meadows #11' };
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
@@ -191,32 +245,51 @@ document.getElementById('title-h1').textContent = SPEC.title;
 document.getElementById('subtitle').textContent = "Time unit: " + (SPEC.time_unit || "steps") + " · Horizon: " + SPEC.horizon + " " + (SPEC.time_unit || "steps");
 document.getElementById('ref-mode').textContent = SPEC.reference_mode || "(not specified)";
 
+// ---- SVG diagram: stock/flow with auto-detected information links ----
 function renderDiagram() {
-  const el = document.getElementById('diagram');
-  const inFlows = SPEC.flows.filter(f => f.to === SPEC.stock.name && f.from === null);
-  const outFlows = SPEC.flows.filter(f => f.from === SPEC.stock.name && f.to === null);
-  let html = '';
-  if (inFlows.length) {
-    html += '<span class="cloud">☁</span>';
-    html += '<div class="flow-arrow in"><div class="name">' + escapeHtml(inFlows[0].name) + '</div><div class="arrow">→</div><div class="expr">' + escapeHtml(inFlows[0].expression) + '</div></div>';
+  const stockName = SPEC.stock.name;
+  document.getElementById('stock-name-svg').textContent = stockName;
+  document.getElementById('stock-units-svg').textContent = (SPEC.stock.units || '').toUpperCase();
+
+  const inflows = SPEC.flows.filter(f => f.to === stockName && f.from === null);
+  const outflows = SPEC.flows.filter(f => f.from === stockName && f.to === null);
+
+  if (inflows.length) {
+    document.getElementById('src-cloud').setAttribute('display', 'inline');
+    document.getElementById('inflow-g').setAttribute('display', 'inline');
+    document.getElementById('inflow-name').textContent = inflows[0].name;
+    document.getElementById('inflow-expr').textContent = inflows[0].expression;
+    // Information link: drawn if the inflow expression references the stock
+    const f = flowFns.find(x => x.name === inflows[0].name);
+    if (f && f.refs.has(stockName)) {
+      document.getElementById('inflow-info-link').setAttribute('display', 'inline');
+    }
   }
-  html += '<div class="stock-box"><div class="name">' + escapeHtml(SPEC.stock.name) + '</div><div class="val" id="stock-val">' + SPEC.stock.initial + '</div><div class="units">' + escapeHtml(SPEC.stock.units || '') + '</div></div>';
-  if (outFlows.length) {
-    html += '<div class="flow-arrow out"><div class="name">' + escapeHtml(outFlows[0].name) + '</div><div class="arrow">→</div><div class="expr">' + escapeHtml(outFlows[0].expression) + '</div></div>';
-    html += '<span class="cloud">☁</span>';
+  if (outflows.length) {
+    document.getElementById('snk-cloud').setAttribute('display', 'inline');
+    document.getElementById('outflow-g').setAttribute('display', 'inline');
+    document.getElementById('outflow-name').textContent = outflows[0].name;
+    document.getElementById('outflow-expr').textContent = outflows[0].expression;
+    const f = flowFns.find(x => x.name === outflows[0].name);
+    if (f && f.refs.has(stockName)) {
+      document.getElementById('outflow-info-link').setAttribute('display', 'inline');
+    }
   }
-  el.innerHTML = html;
 }
 
 function renderSliders() {
   const el = document.getElementById('sliders');
-  el.innerHTML = SPEC.params.map(p =>
-    '<div class="slider-row">' +
-      '<div class="lbl">' + escapeHtml(p.label || p.name) + '<span class="units">' + escapeHtml(p.units || '') + '</span></div>' +
+  el.innerHTML = SPEC.params.map(p => {
+    const cls = classifyParam(p.name);
+    return '<div class="slider-row">' +
+      '<div class="lbl">' + escapeHtml(p.label || p.name) +
+        '<span class="units">' + escapeHtml(p.units || '') + '</span>' +
+        '<span class="leverage" title="Meadows leverage point classification">' + escapeHtml(cls.label) + '</span>' +
+      '</div>' +
       '<input type="range" id="slider-' + escapeHtml(p.name) + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + p.default + '">' +
       '<div class="val" id="val-' + escapeHtml(p.name) + '">' + p.default + '</div>' +
-    '</div>'
-  ).join('');
+    '</div>';
+  }).join('');
 }
 
 function renderChips() {
@@ -234,21 +307,41 @@ function getCurrentParams() {
   return out;
 }
 
+function netFlow(params, stockValue) {
+  const scope = { ...params, [SPEC.stock.name]: stockValue };
+  let inFlow = 0, outFlow = 0;
+  for (const f of flowFns) {
+    const v = f.fn(scope);
+    if (f.to === SPEC.stock.name && f.from === null) inFlow += v;
+    else if (f.from === SPEC.stock.name && f.to === null) outFlow += v;
+  }
+  return { inFlow, outFlow, net: inFlow - outFlow };
+}
+
 function simulate(params) {
   const series = [SPEC.stock.initial];
   let s = SPEC.stock.initial;
   for (let t = 0; t < SPEC.horizon; t++) {
-    const scope = { ...params, [SPEC.stock.name]: s };
-    let inFlow = 0, outFlow = 0;
-    for (const f of flowFns) {
-      const v = f.fn(scope);
-      if (f.to === SPEC.stock.name && f.from === null) inFlow += v;
-      else if (f.from === SPEC.stock.name && f.to === null) outFlow += v;
-    }
-    s = Math.max(0, s + inFlow - outFlow);
+    const { net } = netFlow(params, s);
+    s = Math.max(0, s + net);
     series.push(s);
   }
   return series;
+}
+
+// Equilibrium: simulate to 5x horizon; converged if last-step relative change < 0.001
+function detectEquilibrium(params) {
+  const longHorizon = Math.max(SPEC.horizon * 5, 100);
+  let s = SPEC.stock.initial;
+  let prev = s;
+  for (let t = 0; t < longHorizon; t++) {
+    prev = s;
+    const { net } = netFlow(params, s);
+    s = Math.max(0, s + net);
+    if (!isFinite(s) || s > 1e12) return null;
+  }
+  if (Math.abs(s - prev) / Math.max(1, Math.abs(s)) < 0.001) return s;
+  return null;
 }
 
 function niceMax(v) {
@@ -264,10 +357,16 @@ function niceMax(v) {
 }
 
 function fmt(n) {
+  if (!isFinite(n)) return '—';
   if (Math.abs(n) >= 1000) return n.toFixed(0);
   if (Math.abs(n) >= 10) return n.toFixed(1);
   if (Math.abs(n) >= 1) return n.toFixed(2);
   return n.toFixed(3);
+}
+
+function fmtSigned(n) {
+  if (!isFinite(n)) return '—';
+  return (n >= 0 ? '+' : '') + fmt(n);
 }
 
 let canvasCtx = null;
@@ -281,7 +380,7 @@ function setupCanvas() {
   return { cv, w: rect.width, h: rect.height };
 }
 
-function drawChart(series) {
+function drawChart(series, equilibrium) {
   if (!canvasCtx) canvasCtx = setupCanvas();
   const { cv, w, h } = canvasCtx;
   const ctx = cv.getContext('2d');
@@ -291,7 +390,9 @@ function drawChart(series) {
   const plotW = w - padL - padR, plotH = h - padT - padB;
 
   const dataMax = Math.max(...series, 1);
-  const yMax = niceMax(dataMax * 1.1);
+  // include equilibrium in y-axis range so the dashed line is visible
+  const includeEq = (equilibrium != null && isFinite(equilibrium) && equilibrium >= 0) ? equilibrium : 0;
+  const yMax = niceMax(Math.max(dataMax, includeEq) * 1.1);
 
   ctx.strokeStyle = '#475569';
   ctx.lineWidth = 1;
@@ -323,6 +424,25 @@ function drawChart(series) {
     ctx.fillText(t.toString(), x, padT + plotH + 6);
   }
 
+  // Equilibrium reference line (Sterman) — drawn before data so it sits behind the trajectory
+  if (equilibrium != null && isFinite(equilibrium) && equilibrium >= 0 && equilibrium <= yMax) {
+    const eqY = padT + plotH - (equilibrium / yMax) * plotH;
+    ctx.strokeStyle = '#8B5CF6';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(padL, eqY);
+    ctx.lineTo(padL + plotW, eqY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#8B5CF6';
+    ctx.font = 'bold 10px ui-monospace, "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('eq ' + fmt(equilibrium), padL + plotW - 4, eqY - 3);
+  }
+
+  // Trajectory
   ctx.strokeStyle = '#06B6D4';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -350,7 +470,27 @@ function update() {
   for (const p of SPEC.params) {
     document.getElementById('val-' + p.name).textContent = fmt(params[p.name]);
   }
-  drawChart(simulate(params));
+  const series = simulate(params);
+  const eq = detectEquilibrium(params);
+  drawChart(series, eq);
+
+  // Δ at t=0 (Sterman: net rate of change is the lesson, not the level)
+  const { net } = netFlow(params, SPEC.stock.initial);
+  const stockUnits = SPEC.stock.units || '';
+  const tu = SPEC.time_unit || 'step';
+  const tuSing = tu.endsWith('s') ? tu.slice(0, -1) : tu;
+  document.getElementById('delta-readout').textContent = fmtSigned(net) + ' ' + stockUnits + '/' + tuSing;
+
+  // Equilibrium readout
+  const eqEl = document.getElementById('equilibrium-readout');
+  if (eq == null) {
+    eqEl.textContent = 'unbounded / non-convergent';
+  } else {
+    eqEl.textContent = fmt(eq) + ' ' + stockUnits;
+  }
+
+  // Terminal stock at end of horizon
+  document.getElementById('terminal-readout').textContent = fmt(series[series.length - 1]) + ' ' + stockUnits;
 }
 
 function runExtractionTest() {

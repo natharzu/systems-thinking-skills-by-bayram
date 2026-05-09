@@ -1,7 +1,7 @@
 {
   "name": "systems-thinking-skills",
   "description": "Claude Code skills for systems thinking: stock-flow / causal-loop diagram critique with archetype identification (W2), and stock-flow simulation commissioning (W3 \u2014 emit a brief that your AI agent uses to build an interactive HTML simulation app). From the AI + Systems Thinking course (Empatika).",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "author": {
     "name": "Bayram Annakov",
     "email": "bayram@onsa.ai"

@@ -169,7 +169,7 @@ Integration: Euler, dt = 1
 
 A SINGLE HTML file `model.html`. No npm install. React via esm.sh CDN. Recharts via CDN. Opens in browser via file://.
 
-Layout: title at top, SVG stock-flow diagram, Recharts LineChart of primary stock over time, sliders below, equation chips at bottom (showing literal equations from MY MODEL).
+Layout: title at top, SVG stock-flow diagram (with information links), readout strip (Δ at t=0 · equilibrium · t=horizon), Recharts LineChart with equilibrium reference line, sliders (each with leverage-point chip), equation chips at bottom (literal equations from MY MODEL).
 
 # IRON CONSTRAINTS
 
@@ -182,6 +182,18 @@ Layout: title at top, SVG stock-flow diagram, Recharts LineChart of primary stoc
 7. No localStorage, no URL params, no external state.
 8. Equation chips show literal strings from MY MODEL — prefer modeler notation over raw JS ternary if a clearer form exists.
 9. One companion `test_sim.{mjs,js}` file allowed for verification. Do NOT produce alternate model.html variants.
+
+# PEDAGOGICAL UI ELEMENTS (MANDATORY — Sterman/Forrester/Meadows)
+
+These ride alongside the chart and sliders. Implement all five — they are the difference between a flow simulator and a system-dynamics teaching tool.
+
+1. **Information links in the diagram (Forrester).** When a flow's rate equation references a stock, draw a dashed arrow with arrowhead from that stock to the flow. Muted neutral color (e.g., `#94A3B8`). This makes feedback loops visible.
+2. **Leverage-point chip on each slider (Meadows).** Heuristic from equation context: if a parameter appears in a flow expression that ALSO references a stock (e.g., `Stock / Param`, `Stock * Param`) → "delay / rate constant · Meadows #9". Otherwise → "flow rate · Meadows #11". If the parameter name encodes a target (`*Goal`, `*Target`, `*Capacity` used as goal) → "goal · Meadows #3".
+3. **Equilibrium reference line on chart (Sterman).** Simulate to ~5× horizon (or ≥100 steps). If trajectory converges (last-step relative change < 0.001), draw a dashed horizontal line at the asymptote, labeled "eq <value>". Distinct muted color (e.g., `#8B5CF6` purple). If non-convergent, hide line and mark equilibrium as "unbounded / non-convergent".
+4. **Δ at t=0 readout (Sterman).** Above the chart: "Δ at t=0: ±N <stock-units>/<time-unit>" — the net flow at the initial state. The change is the lesson, not the level.
+5. **Terminal stock readout (Sterman).** Stock value at t=horizon, beside the equilibrium readout — lets users compare "where did we end up" vs "where this is heading."
+
+These five are non-negotiable. Implement all of them.
 
 # STACK
 

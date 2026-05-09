@@ -90,11 +90,13 @@ Default is three phases (A → B → C). If the user does not have a diagram and
 | Cap | Limit |
 |---|---|
 | Stocks | exactly 1 |
-| Flows | exactly 2 (one in, one out) — or 1 in + 1 out as a minimum |
+| Flows | exactly 1 inflow + 1 outflow (= 2 flows total) |
 | Parameters | exactly 2 |
 | Time horizon | ≤30 steps |
-| Equations | linear only — no `min(...)`, no ternary `(? :)`, no delays, no `t`-conditional |
+| Equations | linear only — `Stock`, `Param`, numbers, `+`, `-`, `*`, `/`, parens. No `min(...)`, no ternary `(? :)`, no delays, no `t`-conditional, no calls |
 | Negative-stock | clamp at zero (the canonical brief default) |
+
+**Pass 1 trim escape hatch:** number literals are allowed inside expressions. If the user has 3+ params and you need to demote one, **fold it into the equation as a literal** rather than inventing a new parameter. Example: instead of keeping `SwitchCost` as a 3rd parameter, write the depletion equation as `Switches * 5` (literal 5) and tell the user "SwitchCost is hardcoded at 5 for Pass 1; promote it back to a slider in Pass 2." This keeps the 2-param cap without losing the dynamic.
 
 **If the user's model violates a cap, refuse to proceed.** Run a *trim conversation*:
 - Stocks: "You named 2 stocks. For Pass 1, pick the one you most want to understand. The other becomes a parameter (constant for now), or removed."

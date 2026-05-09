@@ -238,42 +238,46 @@ Before you emit the brief in Phase B, silently check:
 
 If any check fails, stop, surface the specific gap, and ask the user to fix it before emitting the brief.
 
-## Worked example — Stanislav's accounting backlog
+## Worked example — US vehicle fleet turnover (Sterman canonical)
 
-**Input** (after `/ai-systems-coach` Phase C):
-- Stocks: Clients = 50 clients
-- Flows: NewClients (from null to Clients) = WoMRate × Clients × (1 - Saturation); Churn (from Clients to null) = Clients × ChurnRateBase × max(1, Load / Capacity)
-- Parameters: WoMRate ∈ [0.05, 0.20] default 0.10; Saturation ∈ [0.10, 0.30] default 0.20; ChurnRateBase ∈ [0.02, 0.10] default 0.05; Capacity ∈ [40, 120] default 80
-- Reference mode: Clients went from 30 to 50 over last 6 months; want to reach 100 within 12 months
+A canonical Pass 1 case from Sterman's *Business Dynamics* and the Keith / Naumov / Sterman "Driving the Future" management flight simulator (MIT Sloan, 2017). Single stock, constant inflow, first-order proportional outflow. Fits Pass 1 caps cleanly and carries the slow-turnover pedagogical lesson — even drastic policy shifts take a decade-plus to show up in the fleet.
+
+**Input** (Pass 1):
+- Stock: VehicleFleet = 280 (millions of cars in operation, ≈ US 2025 actual)
+- Flows: NewSales (null → VehicleFleet) = SalesRate; Scrappage (VehicleFleet → null) = VehicleFleet / AvgLifetime
+- Parameters: SalesRate default 16 [M cars/year, range 5-30]; AvgLifetime default 20 [years, range 8-30]
+- Reference mode: US fleet ~289M (2025), ~16M new sales/year, average vehicle age 12.8 years (S&P Global Mobility, May 2025). Fleet inching upward at ~3M/year.
 
 ### Phase A — Readback
 
-> Read your model. Stock: Clients (50 clients). Two flows: NewClients in via word-of-mouth amplified by current clients but dampened by market saturation; Churn out, accelerating when load (Clients/Capacity) exceeds 1. Four parameters with ranges.
+> Read your model. Stock: VehicleFleet (280M cars). Two flows: NewSales in (constant rate); Scrappage out, proportional to current fleet via 1/AvgLifetime. Two parameters with ranges. Linear, fits Pass 1.
 >
-> Three things change the simulation meaningfully:
+> Two things change the simulation meaningfully:
 >
-> 1. Is **Saturation** a constant (you've estimated 20%) or does it grow with Clients (e.g., Clients/MarketSize)?
-> 2. **Capacity** — is this a slider you control (you decide hiring), or is it itself a stock that lags hiring decisions by a few months?
-> 3. **ChurnRateBase** — does this fire even when Load < Capacity (some baseline churn always exists), or only when overload?
+> 1. Is **AvgLifetime** the *average age* of vehicles on the road, or the *characteristic lifetime* (1/scrappage-rate)? They differ when the fleet isn't at equilibrium. For first-order turnover with constant sales, equilibrium fleet = SalesRate × AvgLifetime — so AvgLifetime here is the latter.
+> 2. With defaults, equilibrium = 16 × 20 = 320M. Current fleet 280M is below that — does your reference mode confirm "fleet still growing"? S&P data says yes (+3M since 2024).
 >
-> Confirm or correct, then we'll write the brief.
+> Confirm or correct, then I'll build the model.
 
-### Phase B — Brief assembly
+### Phase B — Pass 1 build
 
-(After user confirms: "Saturation constant for now; Capacity slider; baseline churn always fires.")
-
-[Emit canonical brief from `briefs/canonical.md` with Stanislav's model embedded.]
+Skill substitutes the spec into `briefs/pass1_template.html` and writes `./model.html`. The page auto-runs the extraction test on load.
 
 ### Phase C — Extraction test
 
-(After Stanislav reports app is running.)
+> Hand math: at t=0, VehicleFleet = 280M. NewSales = 16M. Scrappage = 280 / 20 = 14M. Fleet at t=1 = max(0, 280 + 16 − 14) = 282M.
+>
+> Open `model.html`. Banner should read **✓ PASS — VehicleFleet = 282.0 (expected 282.0)**. If FAIL → recompute.
+>
+> Drag AvgLifetime from 20 to 10 (cash-for-clunkers scenario). Equilibrium drops to 160M. Watch the fleet trajectory bend — even halving the lifetime, it still takes a decade for the fleet to drop appreciably. **That slow turnover *is* the leverage-point lesson.**
 
-> Hand math: at t=0, Clients = 50, Load = 50/80 = 0.625, max(1, 0.625) = 1. NewClients = 0.10 × 50 × (1 − 0.20) = 4. Churn = 50 × 0.05 × 1 = 2.5. Clients at t=1 = 50 + 4 − 2.5 = 51.5.
+### EV transition framing (for live demo / narration)
+
+> Imagine this stock is EV-only. Set initial = 0, SalesRate = 16 (full mandate), AvgLifetime = 20. Equilibrium EV fleet = 320M. After 5 years: ~70M EVs (~25% of total fleet). After 20 years (one full lifetime): ~250M (~89%). Even with a 100% EV mandate today, the fleet is mostly ICE for a decade.
 >
-> Open your app. Hover at week 1. What does the chart show?
->
-> If it shows ~51.5 → the agent transcribed your equations correctly. Move on.
-> If it shows something else → ask your agent: "Show me the line that updates Clients each step. Read the equation back to me."
+> Reality (2025): EV share of new sales ~7.8% full-year ([EIA](https://www.eia.gov/todayinenergy/detail.php?id=67144)). At that pace, EV stock equilibrium ≈ 1.5M × 20 = 30M (~10% of fleet). Stock turnover, not policy intent, is the rate-limit on transitions.
+
+References: Struben, J. & Sterman, J.D. (2008). *Transition Challenges for Alternative Fuel Vehicle and Transportation Systems.* Environment and Planning B 35(6). · Keith, D., Naumov, S., & Sterman, J. (2017). *Driving the Future: A Management Flight Simulator of the US Automobile Market.* Simulation & Gaming 48(6).
 
 ## What this skill does NOT do
 

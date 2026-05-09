@@ -185,9 +185,19 @@ If the user replies "all correct" without correcting anything, push back: *"Чт
      "time_unit": "<weeks|months|quarters|days>",
      "reference_mode": "<one or two lines>",
      "expected_t1": <number>,
-     "extract_walkthrough": "<plain-English walkthrough of t=0 → t=1 calculation>"
+     "extract_walkthrough": "<plain-English walkthrough of t=0 → t=1 calculation>",
+     "pedagogy": {
+       "insight": "<one-sentence canonical lesson the model teaches>",
+       "loops": [
+         { "id": "<B1|R1|—>", "type": "balancing|reinforcing", "description": "<one-line: which flow + what mediator>" }
+       ],
+       "challenges": [
+         { "q": "<challenge that requires sliding/intervening to answer>", "a": "<short answer with math if applicable>" }
+       ]
+     }
    }
    ```
+   The `pedagogy` block populates the v0.5.0 Read-the-model panel. **Always emit it for Pass 1 builds** — even one insight + one challenge is enough; the panel hides itself if the block is missing or empty. Surface the loop polarity (B vs R) by examining the equation: a flow that drains the stock proportional to it (`Stock / Param` or `Stock * Param`) is a balancing loop; a flow that grows the stock proportional to it (e.g., `Stock * BirthRate`) is reinforcing. If unsure, ask the user.
 2. **Compute `expected_t1` by hand** before writing the file. At t=0, with default param values, evaluate each flow expression. Apply `s_new = max(0, initial + sum_inflows − sum_outflows)`. That's `expected_t1`. Document the calculation in `extract_walkthrough` so the user sees your work.
 3. **Read** `${CLAUDE_SKILL_DIR}/briefs/pass1_template.html`. Substitute `{TITLE}` → spec.title (HTML-escaped), `{SPEC_JSON}` → JSON-stringified spec.
 4. **Write** the result to `./model.html` in the user's current working directory via the Write tool.

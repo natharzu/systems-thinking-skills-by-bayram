@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{TITLE} — Pass 1</title>
+<style>
+  :root {
+    --bg1:#0B1120; --bg2:#0F172A; --bg3:#1E293B;
+    --cyan:#06B6D4; --orange:#F97316; --green:#10B981; --red:#EF4444;
+    --fg:#F1F5F9; --dim:#94A3B8; --rule:#334155;
+  }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "DM Sans", system-ui, sans-serif; margin:0; padding:24px; background:var(--bg1); color:var(--fg); }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .pass-tag { color:var(--cyan); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; }
+  h1 { font-size: 24px; font-weight:600; margin: 4px 0 6px 0; }
+  .subtitle { color: var(--dim); font-size: 13px; margin-bottom: 20px; }
+  .ref { color: #CBD5E1; font-size: 13px; margin-bottom: 18px; padding: 12px 14px; background: var(--bg2); border-left: 3px solid var(--dim); border-radius: 4px; }
+  .ref strong { color: var(--fg); }
+  .panel { background: var(--bg3); padding: 18px; border-radius: 8px; margin-bottom: 14px; }
+  .diagram { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
+  .stock-box { background:var(--bg2); border:2px solid var(--cyan); padding:14px 22px; border-radius:6px; min-width:160px; text-align:center; }
+  .stock-box .name { font-weight:600; font-size:15px; color:var(--fg); }
+  .stock-box .val { font-family: ui-monospace, "JetBrains Mono", "SF Mono", monospace; font-size:22px; color:var(--cyan); margin-top:4px; }
+  .stock-box .units { font-size:11px; color:var(--dim); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+  .flow-arrow { font-size:13px; color:var(--dim); text-align:center; min-width:140px; padding: 0 8px; }
+  .flow-arrow .name { font-weight:600; color:var(--orange); font-size:13px; }
+  .flow-arrow .arrow { font-size: 22px; color: var(--orange); margin: 4px 0; }
+  .flow-arrow .expr { font-family: ui-monospace, monospace; font-size:11px; color:var(--dim); margin-top:2px; }
+  .cloud { font-size: 22px; color: var(--dim); }
+  canvas { display:block; width:100%; max-width:880px; height:280px; background:transparent; }
+  .slider-row { display:flex; align-items:center; gap:14px; padding: 11px 0; border-bottom: 1px solid var(--bg2); }
+  .slider-row:first-child { padding-top:4px; }
+  .slider-row:last-child { border-bottom:none; padding-bottom:4px; }
+  .slider-row .lbl { min-width: 170px; font-size: 13px; }
+  .slider-row .lbl .units { color: var(--dim); font-size: 11px; display:block; }
+  .slider-row input[type=range] { flex:1; accent-color: var(--cyan); }
+  .slider-row .val { min-width: 80px; text-align: right; font-family: ui-monospace, monospace; color: var(--cyan); font-size: 14px; }
+  .chip { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 13px; padding: 9px 12px; background: var(--bg2); border-radius: 4px; margin: 6px 0; color: #E2E8F0; }
+  .chip .flow-name { color: var(--orange); font-weight: 600; }
+  .extract { font-family: ui-monospace, monospace; font-size: 12px; line-height:1.65; background: #0B1626; padding: 14px 16px; border-left: 3px solid var(--cyan); border-radius: 4px; }
+  .extract .heading { color: var(--cyan); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; margin-bottom: 6px; }
+  .pass-mark { color: var(--green); font-weight: 600; }
+  .fail-mark { color: var(--red); font-weight: 600; }
+  .footer { color: var(--dim); font-size: 11px; margin-top: 20px; text-align: center; }
+  @media (max-width: 600px) {
+    .diagram { gap: 4px; }
+    .stock-box { padding: 12px 14px; min-width: 120px; }
+    .flow-arrow { min-width: 100px; }
+    .slider-row .lbl { min-width: 130px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pass-tag">Pass 1 — Simplified</div>
+  <h1 id="title-h1"></h1>
+  <div class="subtitle" id="subtitle"></div>
+  <div class="ref"><strong>Reference mode:</strong> <span id="ref-mode"></span></div>
+
+  <div class="panel diagram" id="diagram"></div>
+  <div class="panel"><canvas id="chart"></canvas></div>
+  <div class="panel" id="sliders"></div>
+  <div class="panel" id="chips"></div>
+
+  <div class="extract">
+    <div class="heading">Extraction test (auto-verified)</div>
+    <div id="extract-walkthrough"></div>
+    <div id="extract-result" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="footer">Built by /ai-stockflow-builder · Pass 1 · <a href="https://github.com/BayramAnnakov/systems-thinking-skills" style="color:var(--dim);">github.com/BayramAnnakov/systems-thinking-skills</a></div>
+</div>
+
+<script id="spec" type="application/json">
+{SPEC_JSON}
+</script>
+<script>
+// Pass 1 expression evaluator: recursive-descent parser for the grammar
+//   expr   := term (('+' | '-') term)*
+//   term   := factor (('*' | '/') factor)*
+//   factor := number | identifier | '(' expr ')' | '-' factor
+// Allowed: identifiers in scope, decimal numbers, + - * /, parens, unary minus.
+// No function calls, no member access, no operators outside the above.
+// (No new Function() — eval'd via parser walks, safe by construction.)
+
+const SPEC = JSON.parse(document.getElementById('spec').textContent);
+
+function tokenize(s) {
+  const tokens = [];
+  let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    if (/\s/.test(c)) { i++; continue; }
+    if (/[0-9.]/.test(c)) {
+      let j = i;
+      while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      tokens.push({ type: 'num', value: parseFloat(s.slice(i, j)) });
+      i = j; continue;
+    }
+    if (/[A-Za-z_]/.test(c)) {
+      let j = i;
+      while (j < s.length && /[A-Za-z0-9_]/.test(s[j])) j++;
+      tokens.push({ type: 'id', value: s.slice(i, j) });
+      i = j; continue;
+    }
+    if ('+-*/()'.includes(c)) {
+      tokens.push({ type: 'op', value: c });
+      i++; continue;
+    }
+    throw new Error("Unexpected character in expression: '" + c + "' at position " + i);
+  }
+  return tokens;
+}
+
+function parse(tokens, allowedNames) {
+  let pos = 0;
+  function peek() { return tokens[pos]; }
+  function eat(value) {
+    const t = tokens[pos];
+    if (!t || (value && t.value !== value)) throw new Error("Expected '" + value + "', got " + (t ? t.value : 'end'));
+    pos++; return t;
+  }
+  function parseFactor() {
+    const t = peek();
+    if (!t) throw new Error("Unexpected end of expression");
+    if (t.type === 'op' && t.value === '-') { eat('-'); const inner = parseFactor(); return ['neg', inner]; }
+    if (t.type === 'op' && t.value === '(') { eat('('); const inner = parseExpr(); eat(')'); return inner; }
+    if (t.type === 'num') { eat(); return ['num', t.value]; }
+    if (t.type === 'id') {
+      eat();
+      if (!allowedNames.has(t.value)) throw new Error("Unknown identifier: '" + t.value + "'");
+      return ['id', t.value];
+    }
+    throw new Error("Unexpected token: " + t.value);
+  }
+  function parseTerm() {
+    let left = parseFactor();
+    while (peek() && peek().type === 'op' && (peek().value === '*' || peek().value === '/')) {
+      const op = eat().value;
+      const right = parseFactor();
+      left = [op, left, right];
+    }
+    return left;
+  }
+  function parseExpr() {
+    let left = parseTerm();
+    while (peek() && peek().type === 'op' && (peek().value === '+' || peek().value === '-')) {
+      const op = eat().value;
+      const right = parseTerm();
+      left = [op, left, right];
+    }
+    return left;
+  }
+  const ast = parseExpr();
+  if (pos < tokens.length) throw new Error("Unexpected trailing token: " + tokens[pos].value);
+  return ast;
+}
+
+function evalAst(ast, scope) {
+  const op = ast[0];
+  if (op === 'num') return ast[1];
+  if (op === 'id') return scope[ast[1]];
+  if (op === 'neg') return -evalAst(ast[1], scope);
+  const a = evalAst(ast[1], scope);
+  const b = evalAst(ast[2], scope);
+  if (op === '+') return a + b;
+  if (op === '-') return a - b;
+  if (op === '*') return a * b;
+  if (op === '/') return a / b;
+  throw new Error("Unknown operator: " + op);
+}
+
+function compileExpr(expr, allowedNames) {
+  const tokens = tokenize(expr);
+  const ast = parse(tokens, allowedNames);
+  return (scope) => evalAst(ast, scope);
+}
+
+// Build allowed names: stock + params
+const allowedNames = new Set([SPEC.stock.name, ...SPEC.params.map(p => p.name)]);
+const flowFns = SPEC.flows.map(f => ({ ...f, fn: compileExpr(f.expression, allowedNames) }));
+
+// ---- UI rendering ----
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+document.getElementById('title-h1').textContent = SPEC.title;
+document.getElementById('subtitle').textContent = "Time unit: " + (SPEC.time_unit || "steps") + " · Horizon: " + SPEC.horizon + " " + (SPEC.time_unit || "steps");
+document.getElementById('ref-mode').textContent = SPEC.reference_mode || "(not specified)";
+
+function renderDiagram() {
+  const el = document.getElementById('diagram');
+  const inFlows = SPEC.flows.filter(f => f.to === SPEC.stock.name && f.from === null);
+  const outFlows = SPEC.flows.filter(f => f.from === SPEC.stock.name && f.to === null);
+  let html = '';
+  if (inFlows.length) {
+    html += '<span class="cloud">☁</span>';
+    html += '<div class="flow-arrow in"><div class="name">' + escapeHtml(inFlows[0].name) + '</div><div class="arrow">→</div><div class="expr">' + escapeHtml(inFlows[0].expression) + '</div></div>';
+  }
+  html += '<div class="stock-box"><div class="name">' + escapeHtml(SPEC.stock.name) + '</div><div class="val" id="stock-val">' + SPEC.stock.initial + '</div><div class="units">' + escapeHtml(SPEC.stock.units || '') + '</div></div>';
+  if (outFlows.length) {
+    html += '<div class="flow-arrow out"><div class="name">' + escapeHtml(outFlows[0].name) + '</div><div class="arrow">→</div><div class="expr">' + escapeHtml(outFlows[0].expression) + '</div></div>';
+    html += '<span class="cloud">☁</span>';
+  }
+  el.innerHTML = html;
+}
+
+function renderSliders() {
+  const el = document.getElementById('sliders');
+  el.innerHTML = SPEC.params.map(p =>
+    '<div class="slider-row">' +
+      '<div class="lbl">' + escapeHtml(p.label || p.name) + '<span class="units">' + escapeHtml(p.units || '') + '</span></div>' +
+      '<input type="range" id="slider-' + escapeHtml(p.name) + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + p.default + '">' +
+      '<div class="val" id="val-' + escapeHtml(p.name) + '">' + p.default + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function renderChips() {
+  const el = document.getElementById('chips');
+  el.innerHTML = SPEC.flows.map(f =>
+    '<div class="chip"><span class="flow-name">' + escapeHtml(f.name) + ':</span> ' + escapeHtml(f.expression) + ' <span style="color:var(--dim);">[' + escapeHtml(f.units || '') + ']</span></div>'
+  ).join('');
+}
+
+function getCurrentParams() {
+  const out = {};
+  for (const p of SPEC.params) {
+    out[p.name] = parseFloat(document.getElementById('slider-' + p.name).value);
+  }
+  return out;
+}
+
+function simulate(params) {
+  const series = [SPEC.stock.initial];
+  let s = SPEC.stock.initial;
+  for (let t = 0; t < SPEC.horizon; t++) {
+    const scope = { ...params, [SPEC.stock.name]: s };
+    let inFlow = 0, outFlow = 0;
+    for (const f of flowFns) {
+      const v = f.fn(scope);
+      if (f.to === SPEC.stock.name && f.from === null) inFlow += v;
+      else if (f.from === SPEC.stock.name && f.to === null) outFlow += v;
+    }
+    s = Math.max(0, s + inFlow - outFlow);
+    series.push(s);
+  }
+  return series;
+}
+
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const exp = Math.floor(Math.log10(v));
+  const m = v / Math.pow(10, exp);
+  let nice;
+  if (m <= 1) nice = 1;
+  else if (m <= 2) nice = 2;
+  else if (m <= 5) nice = 5;
+  else nice = 10;
+  return nice * Math.pow(10, exp);
+}
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000) return n.toFixed(0);
+  if (Math.abs(n) >= 10) return n.toFixed(1);
+  if (Math.abs(n) >= 1) return n.toFixed(2);
+  return n.toFixed(3);
+}
+
+let canvasCtx = null;
+function setupCanvas() {
+  const cv = document.getElementById('chart');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = cv.getBoundingClientRect();
+  cv.width = rect.width * dpr;
+  cv.height = rect.height * dpr;
+  cv.getContext('2d').scale(dpr, dpr);
+  return { cv, w: rect.width, h: rect.height };
+}
+
+function drawChart(series) {
+  if (!canvasCtx) canvasCtx = setupCanvas();
+  const { cv, w, h } = canvasCtx;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+
+  const padL = 56, padR = 16, padT = 12, padB = 28;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+
+  const dataMax = Math.max(...series, 1);
+  const yMax = niceMax(dataMax * 1.1);
+
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT + plotH);
+  ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '11px ui-monospace, "JetBrains Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + plotH - (i / 4) * plotH;
+    const v = (i / 4) * yMax;
+    ctx.fillText(fmt(v), padL - 6, y);
+    if (i > 0 && i < 4) {
+      ctx.strokeStyle = '#1E293B';
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+    }
+  }
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const xStep = SPEC.horizon <= 12 ? 2 : (SPEC.horizon <= 24 ? 4 : 6);
+  for (let t = 0; t <= SPEC.horizon; t += xStep) {
+    const x = padL + (t / SPEC.horizon) * plotW;
+    ctx.fillText(t.toString(), x, padT + plotH + 6);
+  }
+
+  ctx.strokeStyle = '#06B6D4';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < series.length; i++) {
+    const x = padL + (i / SPEC.horizon) * plotW;
+    const y = padT + plotH - (series[i] / yMax) * plotH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#06B6D4';
+  for (let i = 0; i < series.length; i++) {
+    const x = padL + (i / SPEC.horizon) * plotW;
+    const y = padT + plotH - (series[i] / yMax) * plotH;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  document.getElementById('stock-val').textContent = fmt(series[series.length - 1]);
+}
+
+function update() {
+  const params = getCurrentParams();
+  for (const p of SPEC.params) {
+    document.getElementById('val-' + p.name).textContent = fmt(params[p.name]);
+  }
+  drawChart(simulate(params));
+}
+
+function runExtractionTest() {
+  document.getElementById('extract-walkthrough').textContent = SPEC.extract_walkthrough || "(no walkthrough specified)";
+  const defaultParams = {};
+  for (const p of SPEC.params) defaultParams[p.name] = p.default;
+  const series = simulate(defaultParams);
+  const t1 = series[1];
+  const expected = SPEC.expected_t1;
+  const diff = Math.abs(t1 - expected);
+  const banner = document.getElementById('extract-result');
+  if (diff < 0.01) {
+    banner.innerHTML = '<span class="pass-mark">✓ PASS</span> — at t=1 with defaults, ' + escapeHtml(SPEC.stock.name) + ' = ' + fmt(t1) + ' (expected ' + fmt(expected) + ')';
+  } else {
+    banner.innerHTML = '<span class="fail-mark">✗ FAIL</span> — at t=1, ' + escapeHtml(SPEC.stock.name) + ' = ' + fmt(t1) + ' (expected ' + fmt(expected) + ', diff ' + fmt(diff) + '). Equation diverges from hand math.';
+  }
+}
+
+renderDiagram();
+renderSliders();
+renderChips();
+for (const p of SPEC.params) {
+  document.getElementById('slider-' + p.name).addEventListener('input', update);
+}
+window.addEventListener('resize', () => { canvasCtx = null; update(); });
+update();
+runExtractionTest();
+</script>
+</body>
+</html>

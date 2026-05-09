@@ -162,9 +162,42 @@ End Phase A with: *"Confirm the readback (or correct it). Once you've found at l
 
 If the user replies "all correct" without correcting anything, push back: *"Что у тебя в единицах для ArrivalRate? И что произойдёт если Backlog уйдёт в минус?"* (or English equivalent). Force a disagreement.
 
-### Phase B — Commissioning brief (turn 2, after user confirms readback)
+### Phase B — Branches by Pass
 
-Emit a single copy-paste block: a complete commissioning brief that the user pastes into Claude Code or Codex. The brief includes:
+**If Pass 1: build `model.html` directly via the bundled template.** Skip the brief entirely. Steps:
+
+1. Build the JSON spec from the confirmed Phase A model. Schema:
+   ```json
+   {
+     "title": "<short title>",
+     "stock": {"name": "<StockName>", "initial": <number>, "units": "<units>"},
+     "flows": [
+       {"name": "<FlowName>", "from": null|"<StockName>", "to": null|"<StockName>", "expression": "<linear expr>", "units": "<units>"},
+       {"name": "...", ...}
+     ],
+     "params": [
+       {"name": "<ParamName>", "default": <n>, "min": <n>, "max": <n>, "step": <n>, "label": "<short>", "units": "<units>"},
+       {"name": "...", ...}
+     ],
+     "horizon": <integer ≤30>,
+     "time_unit": "<weeks|months|quarters|days>",
+     "reference_mode": "<one or two lines>",
+     "expected_t1": <number>,
+     "extract_walkthrough": "<plain-English walkthrough of t=0 → t=1 calculation>"
+   }
+   ```
+2. **Compute `expected_t1` by hand** before writing the file. At t=0, with default param values, evaluate each flow expression. Apply `s_new = max(0, initial + sum_inflows − sum_outflows)`. That's `expected_t1`. Document the calculation in `extract_walkthrough` so the user sees your work.
+3. **Read** `${CLAUDE_SKILL_DIR}/briefs/pass1_template.html`. Substitute `{TITLE}` → spec.title (HTML-escaped), `{SPEC_JSON}` → JSON-stringified spec.
+4. **Write** the result to `./model.html` in the user's current working directory via the Write tool.
+5. Tell the user (one short message): "Saved to ./model.html. Open it. The page auto-verifies the extraction test — should show ✓ PASS at t=1 with default sliders. Drag the sliders to explore." Include the path in clickable form if the runtime supports it.
+6. Skip to Phase C (which now mostly happens visually inside the page).
+
+**Iron rules for Pass 1 template build:**
+- Linear expressions only: `Stock * Param`, `Param`, `Param * Number`, sums of these. No `min(...)`, no ternaries, no calls. The template's parser will reject anything else with a clear error — but better to catch it before writing.
+- All identifiers in flow expressions MUST appear in either `stock.name` or `params[].name`. No bare numbers as the entire expression — wrap in a parameter.
+- `expected_t1` MUST equal what the template will compute. If you got a number that disagrees with the template's auto-verify, your hand-math is wrong; recompute.
+
+**If Pass 2: emit a commissioning brief** (the canonical agent-build flow). The brief includes:
 
 1. **Role statement** for the agent: build an interactive stock-flow simulation, NOT a model designer
 2. **Model spec** (verbatim from Phase A): stocks, flows, parameters, reference mode

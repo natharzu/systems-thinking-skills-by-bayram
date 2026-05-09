@@ -169,7 +169,13 @@ Integration: Euler, dt = 1
 Insight: <<one-sentence canonical lesson the model teaches>>
 Loops:
 - <<id>> (<<balancing|reinforcing>>): <<one-line description>>
-Try this:
+ConcepTests (Mazur — multi-choice with commit-test-reveal):
+- Q: <<question with intuition trap>>
+  Options: A) <<wrong>>; B) <<wrong>>; C) <<correct>>; D) <<wrong>>
+  Correct index: <<2>>
+  Test config — sliders: {ParamA: value, ParamB: value}; interventions: [{t, paramName, newValue}]
+  Explanation: <<math + which trap the wrong answers spring>>
+Try this (open-ended):
 - Q: <<challenge that requires sliding/intervening>>
   A: <<short explanation, with math if applicable>>
 
@@ -205,9 +211,9 @@ These ride alongside the chart and sliders. Implement all of them — they are t
 
 ## Interactive learning loop (predict → reveal → intervene → explain)
 
-6. **Predict-before-reveal (Sterman + Mazur).** App opens in a `predict` phase: chart axes drawn, trajectory hidden, sliders disabled (locked at defaults), only an `initial: <value>` anchor dot at t=0. User clicks 1-6 chart points to add gold prediction dots at (t, value), snapped to integer t. A "Reveal trajectory" button transitions to `tinker` phase: trajectory + equilibrium + readouts + intervention panel appear; sliders unlock. Predictions stay as gold dots so the user sees their mental-model gap. Show prediction error in the readouts row: average |predicted − actual| against the no-intervention trajectory at current slider values, plus average percentage. The bathtub-mispredict experience must land *in the artifact*.
-7. **Mid-run intervention scheduler (Papert + Sterman).** In `tinker` phase, a panel below the chart where the user schedules `at t=N, set <param> to <new value>`. Multiple interventions stack. Visualize each as a vertical dashed orange line at t=N. Modify the simulation kernel: at each step, before computing flows, check for any intervention with t == current step and apply it to the active param scope. Render a **ghost trace** (orange dashed, alpha ≈ 0.45) showing the simulation *without* interventions for visual comparison. Equilibrium calculation must apply all interventions, then continue past horizon to convergence — eq readout reflects post-intervention destination.
-8. **Read-the-model panel (Case + Meadows).** Below the equation chips, a panel populated from the `pedagogy` block in MY MODEL: "What this model teaches" insight (one sentence) + "Loops" list with B/R-typed badges + "Try this" challenges as `<details>` collapsibles. If MY MODEL has no `pedagogy` block, hide the panel.
+6. **Predict-before-reveal with animated reveal (Sterman + Mazur).** App opens in a `predict` phase: chart axes drawn, trajectory hidden, sliders disabled (locked at defaults), only an `initial: <value>` anchor dot at t=0. User clicks 1-6 chart points to add gold prediction dots at (t, value), snapped to integer t. "Reveal trajectory" button transitions to `tinker` phase. **Animate the trajectory drawing** in over ~1.1s with cubic ease-out, a glowing leader dot riding the front; equilibrium line + readouts + intervention panel populate at animation start; sliders unlock. The animation gives the predict-vs-actual gap time to land emotionally. Show prediction error: avg |predicted − actual| against no-intervention trajectory at current slider values, plus percentage.
+7. **Mid-run intervention scheduler (Papert + Sterman).** In `tinker` phase, a panel below the chart where the user schedules `at t=N, set <param> to <new value>`. Multiple interventions stack. Visualize each as a vertical dashed orange line at t=N. Modify the simulation kernel: at each step, before computing flows, check for any intervention with t == current step and apply it to the active param scope. Render a **ghost trace** (orange dashed, alpha ≈ 0.45) showing the simulation *without* interventions for visual comparison. Equilibrium calculation must apply all interventions, then continue past horizon to convergence.
+8. **Read-the-model panel + ConcepTests (Case + Meadows + Mazur).** Below the equation chips, populated from `pedagogy` block in MY MODEL: "What this model teaches" insight + "Loops" with B/R badges + **"ConcepTests"** (multi-choice questions with click-to-commit + Test-it button that applies the test config to sliders/interventions + Show-answer that marks correct/wrong + reveals explanation — Mazur peer-instruction sequence in solo form) + "Try this" open-ended challenges as `<details>`. If MY MODEL has no `pedagogy` block, hide the panel.
 9. **Hover-to-illuminate (Bret Victor).** Hovering a slider row glows the SVG flow group(s) that reference that param, the corresponding info-link path, and the matching equation chip(s). Inverse: hovering a flow group or chip lights up related sliders. Implement via `data-flows="FlowA FlowB"` attributes + mouseenter/mouseleave handlers toggling a `.hl` class.
 
 These nine elements are the pedagogical contract. Implement all of them.
@@ -404,6 +410,28 @@ When Phase B Pass 1 fires, output the full HTML below with `{TITLE}` and `{SPEC_
   .challenge[open] summary { color: var(--amber); margin-bottom: 8px; }
   .challenge-answer { color: #CBD5E1; padding-top: 6px; border-top: 1px solid var(--rule); }
 
+  /* ConcepTests (Mazur-style, embedded in pedagogy panel) */
+  .ct { background: var(--bg2); padding: 14px 16px; border-radius: 6px; margin: 10px 0; border-left: 3px solid var(--cyan); }
+  .ct-header { font-size: 10px; letter-spacing: 1px; color: var(--cyan); text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+  .ct-q { color: var(--fg); font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
+  .ct-options { display: flex; flex-direction: column; gap: 6px; }
+  .ct-opt { background: var(--bg3); border: 1px solid var(--rule); color: var(--fg); padding: 9px 12px; border-radius: 4px; text-align: left; font-size: 13px; cursor: pointer; transition: all 0.15s ease; font-family: inherit; }
+  .ct-opt:hover:not(:disabled) { border-color: var(--cyan); background: rgba(6,182,212,0.08); }
+  .ct-opt.chosen { border-color: var(--amber); background: rgba(251,191,36,0.10); }
+  .ct-opt.correct-mark { border-color: var(--green); background: rgba(16,185,129,0.12); color: #6EE7B7; }
+  .ct-opt.wrong-mark { border-color: var(--red); background: rgba(239,68,68,0.10); color: #FCA5A5; }
+  .ct-opt:disabled { cursor: default; }
+  .ct-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .ct-test, .ct-reveal { background: transparent; border: 1px solid var(--rule); color: var(--dim); padding: 6px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .ct-test:not(:disabled) { color: var(--cyan); border-color: var(--cyan); }
+  .ct-test:not(:disabled):hover { background: rgba(6,182,212,0.10); }
+  .ct-reveal:not(:disabled) { color: var(--amber); border-color: var(--amber); }
+  .ct-reveal:not(:disabled):hover { background: rgba(251,191,36,0.10); }
+  .ct-test:disabled, .ct-reveal:disabled { cursor: not-allowed; opacity: 0.4; }
+  .ct-explanation { margin-top: 12px; padding: 10px 14px; background: rgba(16,185,129,0.05); border-left: 2px solid var(--green); border-radius: 3px; color: #CBD5E1; font-size: 12px; line-height: 1.6; }
+  .ct-explanation strong { color: var(--green); font-weight: 600; }
+  .ct-explanation strong.wrong { color: var(--red); }
+
   /* Extraction test */
   .extract { font-family: ui-monospace, monospace; font-size: 12px; line-height:1.65; background: #0B1626; padding: 14px 16px; border-left: 3px solid var(--cyan); border-radius: 4px; }
   .extract .heading { color: var(--cyan); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; margin-bottom: 6px; }
@@ -505,6 +533,10 @@ When Phase B Pass 1 fires, output the full HTML below with `{TITLE}` and `{SPEC_
       <h3>Loops in this model</h3>
       <div id="loops"></div>
     </div>
+    <div class="pedagogy-section" id="ct-section" style="display:none;">
+      <h3>ConcepTests <span style="text-transform:none;letter-spacing:normal;color:var(--dim);font-weight:400;">— commit, then test, then reveal (Mazur)</span></h3>
+      <div id="ct-list"></div>
+    </div>
     <div class="pedagogy-section" id="challenges-section" style="display:none;">
       <h3>Try this</h3>
       <div id="challenges"></div>
@@ -517,7 +549,7 @@ When Phase B Pass 1 fires, output the full HTML below with `{TITLE}` and `{SPEC_
     <div id="extract-result" style="margin-top:8px;"></div>
   </div>
 
-  <div class="footer">Built by /ai-stockflow-builder · Pass 1 v0.5.0 · <a href="https://github.com/BayramAnnakov/systems-thinking-skills" style="color:var(--dim);">github.com/BayramAnnakov/systems-thinking-skills</a></div>
+  <div class="footer">Built by /ai-stockflow-builder · Pass 1 v0.6.0 · <a href="https://github.com/BayramAnnakov/systems-thinking-skills" style="color:var(--dim);">github.com/BayramAnnakov/systems-thinking-skills</a></div>
 </div>
 
 <script id="spec" type="application/json">
@@ -654,6 +686,9 @@ const state = {
   phase: 'predict',           // 'predict' | 'tinker'
   predictions: [],            // [{t, value}]
   interventions: [],          // [{t, paramName, newValue}]
+  conceptTests: [],           // [{chosen: int|null, revealed: bool}]
+  animProgress: null,         // null | 0..1 during reveal animation
+  animating: false,
 };
 
 // ---------- Static rendering ----------
@@ -752,6 +787,136 @@ function renderPedagogy() {
         '<div class="challenge-answer">' + escapeHtml(c.a || '') + '</div>' +
       '</details>'
     ).join('');
+  }
+}
+
+// Tiny DOM helper used by ConcepTest renderer (avoids innerHTML for safety).
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  if (attrs) {
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k === 'dataset') { for (const [dk, dv] of Object.entries(v)) node.dataset[dk] = dv; }
+      else if (k === 'disabled' && v) node.disabled = true;
+      else if (k === 'hidden' && v) node.hidden = true;
+      else node.setAttribute(k, v);
+    }
+  }
+  if (children) {
+    for (const c of children) {
+      if (c == null) continue;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+  }
+  return node;
+}
+
+// ---------- ConcepTests (Mazur peer-instruction style, embedded) ----------
+function renderConceptTests() {
+  const ped = SPEC.pedagogy;
+  if (!ped || !ped.conceptTests || !ped.conceptTests.length) return;
+  state.conceptTests = ped.conceptTests.map(() => ({ chosen: null, revealed: false }));
+  document.getElementById('pedagogy').style.display = '';
+  document.getElementById('ct-section').style.display = '';
+  const list = document.getElementById('ct-list');
+  list.replaceChildren();
+
+  ped.conceptTests.forEach((ct, i) => {
+    const total = ped.conceptTests.length;
+    const ctEl = el('div', { class: 'ct', dataset: { idx: String(i) } });
+    ctEl.appendChild(el('div', { class: 'ct-header', text: 'ConcepTest ' + (i + 1) + ' / ' + total }));
+    ctEl.appendChild(el('div', { class: 'ct-q', text: ct.q || '' }));
+
+    const optsEl = el('div', { class: 'ct-options' });
+    const optBtns = [];
+    (ct.options || []).forEach((opt, j) => {
+      const lbl = opt.label || String.fromCharCode(65 + j);
+      const btn = el('button', { class: 'ct-opt', dataset: { opt: String(j) }, text: lbl + ') ' + (opt.text || '') });
+      optBtns.push(btn);
+      optsEl.appendChild(btn);
+    });
+    ctEl.appendChild(optsEl);
+
+    const actionsEl = el('div', { class: 'ct-actions' });
+    const testBtn = el('button', { class: 'ct-test', disabled: true, text: 'Test it →' });
+    const revealBtn = el('button', { class: 'ct-reveal', disabled: true, text: 'Show answer' });
+    actionsEl.appendChild(testBtn);
+    actionsEl.appendChild(revealBtn);
+    ctEl.appendChild(actionsEl);
+
+    const explEl = el('div', { class: 'ct-explanation', hidden: true });
+    ctEl.appendChild(explEl);
+    list.appendChild(ctEl);
+
+    optBtns.forEach((btn, j) => {
+      btn.addEventListener('click', () => {
+        if (state.conceptTests[i].revealed) return;
+        state.conceptTests[i].chosen = j;
+        optBtns.forEach(o => o.classList.remove('chosen'));
+        btn.classList.add('chosen');
+        testBtn.disabled = false;
+        revealBtn.disabled = false;
+      });
+    });
+
+    testBtn.addEventListener('click', () => {
+      const cfg = ct.test || {};
+      if (cfg.sliders) {
+        for (const [name, val] of Object.entries(cfg.sliders)) {
+          const slider = document.getElementById('slider-' + name);
+          if (slider) slider.value = val;
+        }
+      }
+      state.interventions = (cfg.interventions || []).map(iv => ({ ...iv }));
+      renderInterventionList();
+      if (state.phase !== 'tinker') setPhase('tinker');
+      update();
+      document.getElementById('chart').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    revealBtn.addEventListener('click', () => {
+      const stCt = state.conceptTests[i];
+      stCt.revealed = true;
+      const correct = ct.correct;
+      optBtns.forEach((btn, j) => {
+        btn.disabled = true;
+        if (j === correct) btn.classList.add('correct-mark');
+        else if (j === stCt.chosen && j !== correct) btn.classList.add('wrong-mark');
+      });
+      const right = stCt.chosen === correct;
+      const correctLabel = (ct.options[correct] && ct.options[correct].label) || String.fromCharCode(65 + correct);
+      explEl.replaceChildren();
+      const verdict = el('strong', { class: right ? '' : 'wrong', text: right ? '✓ Correct.' : '✗ Not quite.' });
+      explEl.appendChild(verdict);
+      if (!right) {
+        explEl.appendChild(document.createTextNode(' Right answer: '));
+        explEl.appendChild(el('strong', { text: correctLabel }));
+        explEl.appendChild(document.createTextNode('. '));
+      } else {
+        explEl.appendChild(document.createTextNode(' '));
+      }
+      explEl.appendChild(document.createTextNode(ct.explanation || ''));
+      explEl.hidden = false;
+    });
+  });
+}
+
+function resetConceptTests() {
+  if (!state.conceptTests.length) return;
+  for (let i = 0; i < state.conceptTests.length; i++) {
+    state.conceptTests[i] = { chosen: null, revealed: false };
+  }
+  for (const ctEl of document.querySelectorAll('.ct')) {
+    ctEl.querySelectorAll('.ct-opt').forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('chosen', 'correct-mark', 'wrong-mark');
+    });
+    ctEl.querySelector('.ct-test').disabled = true;
+    ctEl.querySelector('.ct-reveal').disabled = true;
+    const expl = ctEl.querySelector('.ct-explanation');
+    expl.hidden = true;
+    expl.replaceChildren();
   }
 }
 
@@ -959,25 +1124,58 @@ function drawChart(series, ghostSeries, equilibrium) {
     }
   }
 
-  // Trajectory — only in tinker phase
+  // Trajectory — only in tinker phase. During reveal animation, clip drawing
+  // to a partial t (cubic ease-out controlled by state.animProgress).
   if (state.phase === 'tinker') {
+    let lastIdx = series.length - 1;
+    let interpHead = null;
+    if (state.animProgress != null && state.animProgress < 1) {
+      const fullT = state.animProgress * SPEC.horizon;
+      lastIdx = Math.floor(fullT);
+      const frac = fullT - lastIdx;
+      if (lastIdx + 1 < series.length && frac > 0) {
+        const v = series[lastIdx] + (series[lastIdx + 1] - series[lastIdx]) * frac;
+        interpHead = { t: fullT, value: v };
+      }
+    }
     ctx.strokeStyle = '#06B6D4';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    for (let i = 0; i < series.length; i++) {
+    for (let i = 0; i <= lastIdx; i++) {
       const x = padL + (i / SPEC.horizon) * plotW;
       const y = padT + plotH - (series[i] / yMax) * plotH;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
+    if (interpHead) {
+      const x = padL + (interpHead.t / SPEC.horizon) * plotW;
+      const y = padT + plotH - (interpHead.value / yMax) * plotH;
+      ctx.lineTo(x, y);
+    }
     ctx.stroke();
 
     ctx.fillStyle = '#06B6D4';
-    for (let i = 0; i < series.length; i++) {
+    for (let i = 0; i <= lastIdx; i++) {
       const x = padL + (i / SPEC.horizon) * plotW;
       const y = padT + plotH - (series[i] / yMax) * plotH;
       ctx.beginPath();
       ctx.arc(x, y, 2.5, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Glowing leader dot at the moving head during animation
+    if (interpHead) {
+      const x = padL + (interpHead.t / SPEC.horizon) * plotW;
+      const y = padT + plotH - (interpHead.value / yMax) * plotH;
+      ctx.fillStyle = '#06B6D4';
+      ctx.shadowColor = '#06B6D4';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#0B1120';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
   } else {
     // Predict phase: anchor dot at (0, initial)
@@ -1140,9 +1338,30 @@ document.getElementById('chart').addEventListener('click', (e) => {
   update();
 });
 
+function animateReveal(durationMs = 1100) {
+  state.animating = true;
+  state.animProgress = 0;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const t = Math.min(1, elapsed / durationMs);
+    // Cubic ease-out: fast start, gentle landing
+    state.animProgress = 1 - Math.pow(1 - t, 3);
+    update();
+    if (t < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      state.animating = false;
+      state.animProgress = null;
+      update();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
 document.getElementById('reveal-btn').addEventListener('click', () => {
   setPhase('tinker');
-  update();
+  animateReveal();
 });
 
 document.getElementById('clear-pred-btn').addEventListener('click', () => {
@@ -1158,6 +1377,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     document.getElementById('slider-' + p.name).value = p.default;
   }
   renderInterventionList();
+  resetConceptTests();
   setPhase('predict');
   update();
 });
@@ -1257,6 +1477,7 @@ renderDiagram();
 renderSliders();
 renderChips();
 renderPedagogy();
+renderConceptTests();
 renderInterventionParamSelect();
 renderInterventionList();
 attachHoverHandlers();

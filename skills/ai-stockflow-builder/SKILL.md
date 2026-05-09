@@ -191,8 +191,25 @@ If the user replies "all correct" without correcting anything, push back: *"Чт
        "loops": [
          { "id": "<B1|R1|—>", "type": "balancing|reinforcing", "description": "<one-line: which flow + what mediator>" }
        ],
+       "conceptTests": [
+         {
+           "q": "<question with an intuition trap (the most-popular wrong answer should expose a known mental-model bug)>",
+           "options": [
+             { "label": "A", "text": "<plausible wrong>" },
+             { "label": "B", "text": "<correct>" },
+             { "label": "C", "text": "<plausible wrong: linear extrapolation>" },
+             { "label": "D", "text": "<plausible wrong: overshoot>" }
+           ],
+           "correct": 1,
+           "test": {
+             "sliders": { "<ParamName>": <value> },
+             "interventions": [ { "t": <int>, "paramName": "<ParamName>", "newValue": <value> } ]
+           },
+           "explanation": "<math + name the trap the wrong answers spring>"
+         }
+       ],
        "challenges": [
-         { "q": "<challenge that requires sliding/intervening to answer>", "a": "<short answer with math if applicable>" }
+         { "q": "<open-ended challenge that requires sliding/intervening to answer>", "a": "<short answer with math if applicable>" }
        ]
      }
    }

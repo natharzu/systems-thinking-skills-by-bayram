@@ -60,10 +60,22 @@ Loops:
 - <<id, e.g., B1 or R1>> (<<balancing | reinforcing>>): <<one-line description of which flow + which mediator drives this loop>>
 - <<additional loops if present>>
 
-Try this (challenges):
+Try this (open-ended challenges):
 - Q: <<question that requires sliding / intervening to answer>>
   A: <<short explanation, ideally with the math (eq = X × Y, etc.)>>
 - <<2-4 challenges total>>
+
+ConcepTests (Mazur peer-instruction style — multi-choice with commit-test-reveal flow):
+- Q: <<question with 4 distinct options where the most-popular wrong answer is a known intuition trap>>
+  Options:
+    A) <<plausible wrong answer 1>>
+    B) <<plausible wrong answer 2 (often "common-sense linear extrapolation")>>
+    C) <<correct answer>>
+    D) <<plausible wrong answer 3 (often "overshoot fear")>>
+  Correct: <<index 0..3>>
+  Test config: <<sliders: {ParamName: value}, interventions: [{t, paramName, newValue}]>>
+  Explanation: <<what the math shows + which intuition trap the wrong answers spring; cite the time constant or equilibrium formula>>
+- <<1-3 ConcepTests total>>
 
 # DELIVERABLE
 
@@ -148,13 +160,14 @@ These ride alongside the chart and sliders to teach systems-thinking concepts, n
 
 These four turn the simulator from a parametric viewer into a microworld with a predict→reveal→intervene→explain cycle. Implement them all.
 
-6. **Predict-before-reveal (Sterman + Mazur).** App opens in a `predict` phase: chart axes are drawn but the trajectory is hidden, sliders are disabled (locked at defaults), only an `initial: <value>` anchor dot is shown at t=0. The user clicks 1-6 points on the chart to mark "where I think the stock will be at this t". Each click adds a gold dot at the clicked (t, value), snapped to integer t. A prominent "Reveal trajectory" button transitions to the `tinker` phase: chart fills in with the actual trajectory; equilibrium line, terminal readout, prediction-error readout appear; sliders unlock; intervention panel appears. Predictions stay as gold dots forever (until manually cleared) so the user sees their mental-model gap. Compute prediction error as average absolute |predicted − actual| against the no-intervention trajectory at current slider values, plus average percentage. Bathtub-mispredict experience must land *in the artifact*, not just in the slide deck.
+6. **Predict-before-reveal (Sterman + Mazur).** App opens in a `predict` phase: chart axes are drawn but the trajectory is hidden, sliders are disabled (locked at defaults), only an `initial: <value>` anchor dot is shown at t=0. The user clicks 1-6 points on the chart to mark "where I think the stock will be at this t". Each click adds a gold dot at the clicked (t, value), snapped to integer t. A prominent "Reveal trajectory" button transitions to the `tinker` phase. **Animate the reveal**: trajectory draws progressively from t=0 to t=horizon over ~1.1 seconds with cubic ease-out; a glowing leader dot rides the front; equilibrium line and readouts appear at the start of the animation; sliders unlock and intervention panel appears. The animation gives the predict-vs-actual gap *time to land emotionally* — it's the difference between "you got 9% wrong" landing as a footnote versus as a moment. Predictions stay as gold dots forever (until manually cleared). Compute prediction error as average absolute |predicted − actual| against the no-intervention trajectory at current slider values, plus average percentage.
 
 7. **Mid-run intervention scheduler (Papert + Sterman).** Below the chart in `tinker` phase, a panel where the user schedules `at t=N, set <param> to <new value>`. Multiple interventions stack. Visualize each as a vertical dashed orange line at t=N on the chart. Modify the simulation kernel: at each integration step, before computing flows, check if any intervention's t equals the current step; if so, swap that param's value in the active scope. Render a **ghost trace** (orange dashed, alpha ≈ 0.45) of the simulation *without* interventions over the same horizon, so users see "what would have been". Equilibrium calculation must apply all interventions, then continue past horizon to convergence — so eq readout reflects post-intervention destination. This is the difference between a curve viewer and a policy-experiment platform.
 
-8. **Read-the-model panel (Case + Meadows).** Below the equation chips, a panel populated from a `pedagogy` block in the spec (skill-emitted; you must surface it as the user reads the brief and ask whether to fill it in). Three sections:
+8. **Read-the-model panel (Case + Meadows).** Below the equation chips, a panel populated from a `pedagogy` block in the spec (skill-emitted; you must surface it as the user reads the brief and ask whether to fill it in). Four sections:
    - **What this model teaches** — one-sentence canonical insight
    - **Loops in this model** — list of {id, type: "balancing"|"reinforcing", description}; render with a colored badge per type (orange B / cyan R)
+   - **ConcepTests (Mazur peer-instruction)** — list of {q, options: [{label, text}], correct: int, test: {sliders, interventions}, explanation}. Render each as a card: question + clickable option buttons; clicking an option locks the user's commitment (highlighted amber); a "Test it" button applies the test config (sets sliders + interventions) and scrolls the chart into view; a "Show answer" button marks correct option green, wrong choice red, reveals the explanation. The whole point is *commit before testing* — Mazur's peer-instruction sequence imported into a solo microworld.
    - **Try this** — list of {q, a} challenges; render each as a `<details>` block (or equivalent collapsible) so users can attempt before peeking at answers
    If the spec has no `pedagogy` block, hide the entire panel. Otherwise, this is what gives the model a narrative voice — without it, the artifact is mute about its own purpose.
 

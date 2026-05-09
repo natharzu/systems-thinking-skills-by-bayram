@@ -196,7 +196,7 @@ If the user replies "all correct" without correcting anything, push back: *"Чт
 
 **Iron rules for Pass 1 template build:**
 - Linear expressions only: `Stock * Param`, `Param`, `Param * Number`, sums of these. No `min(...)`, no ternaries, no calls. The template's parser will reject anything else with a clear error — but better to catch it before writing.
-- All identifiers in flow expressions MUST appear in either `stock.name` or `params[].name`. No bare numbers as the entire expression — wrap in a parameter.
+- All identifiers in flow expressions MUST appear in either `stock.name` or `params[].name`. Number literals are allowed as operands inside expressions (e.g., `Stock * Param * 0.5` — used by the trim escape hatch); they're forbidden only as the entire expression. Wrap a bare number in a parameter.
 - `expected_t1` MUST equal what the template will compute. If you got a number that disagrees with the template's auto-verify, your hand-math is wrong; recompute.
 
 **If Pass 2: emit a commissioning brief** (the canonical agent-build flow). The brief includes:

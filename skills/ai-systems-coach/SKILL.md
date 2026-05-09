@@ -1,8 +1,11 @@
 ---
 name: ai-systems-coach
 description: Critique a hand-drawn stock-flow / causal-loop diagram and identify the system archetype. Use when the user wants to analyze a stock-flow diagram, validate stocks/flows/loops, identify a system archetype (Limits to Growth / Shifting the Burden / Fixes that Fail), find leverage points (Meadows hierarchy), or prepare a system dynamics model for simulation. Triggers on Russian and English requests like "разбери мою stock-flow диаграмму", "какой это архетип", "leverage points", "critique my causal loop diagram", "limits to growth", "shifting the burden", "fixes that fail", "подготовь модель к симуляции". Refuses to design a diagram from scratch - the user must hand-draw first.
-author: Bayram Annakov (onsa.ai)
-allowed-tools: Read, Write, Bash, AskUserQuestion
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - AskUserQuestion
 ---
 
 # Systems Coach

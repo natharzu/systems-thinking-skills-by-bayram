@@ -8,6 +8,11 @@
       "name": "ai-systems-coach",
       "source": "./",
       "description": "Critique a hand-drawn stock-flow / causal-loop diagram, identify the system archetype (Limits to Growth, Shifting the Burden, Fixes that Fail), and surface Meadows leverage points. Refuses to draw the diagram for you — drawing is the act of thinking."
+    },
+    {
+      "name": "ai-stockflow-builder",
+      "source": "./",
+      "description": "Commission an interactive stock-flow simulation web app from your AI coding agent (Claude Code or Codex). Three phases: readback with forced ≥1 disagreement, brief emission, hand-computed extraction test. Pass 1 enforces hard caps (1 stock / 2 flows / 2 params / ≤30 steps / linear only); Pass 2 extends. Optional Phase 0 interview mode for participants without a diagram."
     }
   ]
 }

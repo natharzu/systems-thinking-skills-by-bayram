@@ -1,7 +1,7 @@
 {
   "name": "systems-thinking-skills",
   "description": "Claude Code skills for systems thinking: stock-flow / causal-loop diagram critique with archetype identification (W2), stock-flow simulation commissioning (W3 \u2014 emit a brief that your AI agent uses to build an interactive HTML simulation app), and Meadows leverage-point mapping for a stated goal (W4). From the AI + Systems Thinking course (Empatika).",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": {
     "name": "Bayram Annakov",
     "email": "bayram@onsa.ai"

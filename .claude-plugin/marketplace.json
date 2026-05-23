@@ -13,6 +13,11 @@
       "name": "ai-stockflow-builder",
       "source": "./",
       "description": "Commission an interactive stock-flow simulation web app from your AI coding agent (Claude Code or Codex). Three phases: readback with forced ≥1 disagreement, brief emission, hand-computed extraction test. Pass 1 enforces hard caps (1 stock / 2 flows / 2 params / ≤30 steps / linear only); Pass 2 extends. Optional Phase 0 interview mode for participants without a diagram."
+    },
+    {
+      "name": "leverage-finder",
+      "source": "./",
+      "description": "Map elements of a stock-flow model to Donella Meadows' 12 leverage points, ranked by potential impact for a stated goal. Refuses to invent stocks, flows, or parameters not in the model. Refuses to return a ranking without an explicit, measurable goal. Returns exactly 3 candidates with at least one at knob ≤5 (the asymmetry lesson)."
     }
   ]
 }

@@ -25,6 +25,23 @@ R: Active Customers → Referrals → New signups → Active Customers
 B: Active Customers → Service Quality (delay 2 weeks) → Churn → Active Customers
 ```
 
+### `/leverage-finder` — Map your model to Meadows' 12 leverage points *(ships with W4)*
+
+**You bring a model and a goal. The skill returns 3 candidate interventions, ranked.**
+
+Takes a stock-flow model you have already built and a measurable goal you have already stated, then maps elements of your model to Donella Meadows' 12 leverage points and returns the 3 highest-leverage candidate interventions for your goal.
+
+The skill enforces the asymmetry lesson structurally: at least one of the 3 candidates must be at knob ≤5 (rules, info flow, goals, paradigm). Most teams reach for parameters (knob 12) first because they have numbers to tune; the skill forces you to consider stronger leverage you can't see as easily.
+
+**Three structural rules:**
+1. **Phase 0 gate** — no measurable goal, no output. The skill refuses to rank leverage without a stated purpose. "Improve the system" gets pushed back with three sharpening questions.
+2. **No inventing structure** — only maps stocks, flows, and parameters the model already contains. Won't add elements the user didn't draw.
+3. **Forced choice** — returns exactly 3 candidates, not a long list. Forcing the choice is part of the discipline.
+
+Each candidate is formatted as: Meadows knob (number + name), what to change in the user's model, why it has leverage for the stated goal, one concrete experiment testable in 2 weeks, one caveat. Closes with an asymmetry paragraph noting which candidate is strongest and which feels most natural — those usually don't match.
+
+**Refuses:** to invent stocks/flows/parameters not in the model, to write code, to march through all 12 leverage points as a checklist, to return more than 3 candidates.
+
 ### `/ai-stockflow-builder` — Commission a runnable simulation app *(ships with W3)*
 
 **The skill emits a brief. Your AI agent (Claude Code or Codex) builds the app. You own the equations.**
@@ -58,6 +75,7 @@ The skills follow the [agentskills.io](https://agentskills.io) open standard —
 /plugin marketplace add BayramAnnakov/systems-thinking-skills
 /plugin install ai-systems-coach@systems-thinking-skills
 /plugin install ai-stockflow-builder@systems-thinking-skills
+/plugin install leverage-finder@systems-thinking-skills
 /reload-plugins
 ```
 
@@ -68,6 +86,7 @@ git clone https://github.com/BayramAnnakov/systems-thinking-skills.git ~/.agents
 mkdir -p ~/.agents/skills
 ln -s ~/.agents/systems-thinking-skills/skills/ai-systems-coach ~/.agents/skills/ai-systems-coach
 ln -s ~/.agents/systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/skills/ai-stockflow-builder
+ln -s ~/.agents/systems-thinking-skills/skills/leverage-finder ~/.agents/skills/leverage-finder
 ```
 
 Codex auto-discovers skills under `~/.agents/skills/`. See [Codex skills docs](https://developers.openai.com/codex/skills).
@@ -79,9 +98,11 @@ git clone https://github.com/BayramAnnakov/systems-thinking-skills.git
 # Claude Code:
 cp -r systems-thinking-skills/skills/ai-systems-coach ~/.claude/skills/
 cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.claude/skills/
+cp -r systems-thinking-skills/skills/leverage-finder ~/.claude/skills/
 # Or Codex:
 cp -r systems-thinking-skills/skills/ai-systems-coach ~/.agents/skills/
 cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/skills/
+cp -r systems-thinking-skills/skills/leverage-finder ~/.agents/skills/
 ```
 
 ### Option 4: Mega-prompt (no skills runtime — plain ChatGPT, Cursor, Claude.ai)
@@ -93,6 +114,7 @@ If your runtime doesn't support skills, copy the `PROMPT.md` from each skill's d
 ```
 /ai-systems-coach          # paste your hand-drawn diagram in structured form
 /ai-stockflow-builder      # paste your model, or say "interview me" for Phase 0
+/leverage-finder           # paste your model + measurable goal; get 3 ranked leverage candidates
 ```
 
 The W2 → W3 progression: run `/ai-systems-coach` after Workshop 2 to grade your archetype homework. Take its "Simulation prep" output and paste it into `/ai-stockflow-builder` after Workshop 3 to build the runnable app.
@@ -106,8 +128,8 @@ Part of the **AI + Systems Thinking** course (6 biweekly online sessions, 2026):
 1. How Systems Work — stocks, flows, feedback, delays
 2. **System Archetypes** — Limits to Growth, Shifting the Burden, Fixes that Fail *(ships `/ai-systems-coach`)*
 3. **From Diagram to Simulation** — turning your diagram into runnable code *(ships `/ai-stockflow-builder`)*
-4. Theory of Constraints — finding your bottleneck
-5. FishBanks — live competitive market simulation
+4. **Goal of the Model + Meadows Leverage** — from "I have a model" to "I know which knobs matter" *(ships `/leverage-finder`)*
+5. Optimization + MCP — connecting models to real data
 6. From Understanding to Transformation — meta-framework
 
 More skills will land in this repo as later workshops ship.
@@ -118,6 +140,7 @@ These skills enforce a strict separation: **humans draw and own equations; AI cr
 
 - `/ai-systems-coach` ships with W2 (after archetypes are taught by hand) and refuses to design a diagram from scratch
 - `/ai-stockflow-builder` ships with W3 (after stock-flow notation is taught) and refuses to invent equations the human didn't name
+- `/leverage-finder` ships with W4 (after the goal-of-the-model and Meadows asymmetry are taught on cohort cases) and refuses to rank leverage without an explicit, measurable goal
 
 The skills also encode the workshop's force-disagreement mechanic. Both refuse to proceed if the user says "looks perfect" — they push back with units, polarity, periodicity, or threshold-vs-linear questions until the user has corrected something. Drawing and disagreeing *are* the act of thinking.
 

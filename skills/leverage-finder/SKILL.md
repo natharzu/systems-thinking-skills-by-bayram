@@ -121,8 +121,23 @@ For each element extracted in Phase 1, identify which Meadows leverage point it 
 Given the user's goal, rank candidate interventions by:
 
 1. **Knob level** (lower number = stronger leverage), but ALSO
-2. **Feasibility** for this specific user (can they actually change a goal? sometimes yes, sometimes no — depends on their authority)
+2. **Feasibility — the control zone** for this specific user (see "Control zones" below). Authority over a knob is not fixed: a knob the user can only "account for" today may be shiftable into "can influence" by negotiation, learning, or restructuring.
 3. **Goal-alignment** (does this knob, if turned, move toward the stated goal?)
+
+### Control zones (feasibility, made concrete)
+
+Every knob sits in one of three zones, and the boundaries differ by the user's role (an owner can change price; an employee can only account for it):
+
+- **Can change** — directly under the user's hand (a parameter they set: price for an owner, budget for a CEO).
+- **Can influence** — movable indirectly (churn via structural steps; a supplier's price via negotiation).
+- **Must account for** — taken as given (price elasticity, inflation, law).
+
+The leverage question is not only "which knob is strong" but "can the user reach it — and if not, can they move it closer?" A knob shifts toward "can change" by:
+- **Negotiation** — when the constraint lives in someone else's head (raise the cap a client or supplier imposes).
+- **Learning / new experience / role change** — when the constraint lives in the user's own head (a paradigm knob; Meadows 2).
+- **Restructuring the model** — change the structure so the knob moves: variable cost → fixed cost → economies of scale turns an untouchable unit cost into a lever, without the cost itself dropping.
+
+Strong Meadows knobs (goals, paradigms) often sit in "must account for" and feel unreachable — naming the shift path is what makes them actionable. This is the same asymmetry as the knob hierarchy.
 
 Output exactly **3 candidate leverage points**, each formatted as:
 
@@ -131,6 +146,7 @@ LEVERAGE CANDIDATE #N
 Meadows knob: [number + name]
 What to change: [specific element from user's model]
 Why it has leverage: [one sentence connecting this knob to the goal]
+Control zone: [can change | can influence | must account for] — [if not "can change": one concrete shift path — negotiation / learning / restructuring]
 What to test: [one concrete experiment they could run in 2 weeks]
 Caveat: [one risk or limitation]
 ```

@@ -1,6 +1,6 @@
 ---
 name: ai-systems-coach
-description: Critique a hand-drawn stock-flow / causal-loop diagram and identify the system archetype. Use when the user wants to analyze a stock-flow diagram, validate stocks/flows/loops, identify a system archetype (Limits to Growth / Shifting the Burden / Fixes that Fail), find leverage points (Meadows hierarchy), or prepare a system dynamics model for simulation. Triggers on Russian and English requests like "разбери мою stock-flow диаграмму", "какой это архетип", "leverage points", "critique my causal loop diagram", "limits to growth", "shifting the burden", "fixes that fail", "подготовь модель к симуляции". Refuses to design a diagram from scratch - the user must hand-draw first.
+description: Critique a hand-drawn stock-flow / causal-loop diagram and identify the system archetype. Use when the user wants to analyze a stock-flow diagram, validate stocks/flows/loops, identify a system archetype (the eight from Pegasus/Senge: Limits to Growth/Success, Shifting the Burden + Addiction, Fixes That Fail, Drifting Goals, Escalation, Growth and Underinvestment, Success to the Successful, Tragedy of the Commons), find leverage points (Meadows hierarchy), or prepare a system dynamics model for simulation. Triggers on Russian and English requests like "разбери мою stock-flow диаграмму", "какой это архетип", "leverage points", "critique my causal loop diagram", "limits to growth", "shifting the burden", "fixes that fail", "drifting goals", "escalation", "tragedy of the commons", "success to the successful", "growth and underinvestment", "дрейф целей", "эскалация", "трагедия общин", "успех успешным", "подготовь модель к симуляции". Refuses to design a diagram from scratch - the user must hand-draw first.
 allowed-tools:
   - Read
   - Write
@@ -21,7 +21,7 @@ Default to English. If the user writes in Russian (or another language), respond
 Activate when the user:
 - sends a structured stock-flow description (stocks, flows, loops)
 - asks to identify a system archetype
-- mentions Limits to Growth / Shifting the Burden / Fixes that Fail (or Russian equivalents: Пределы роста, Подмена проблемы, Решения, которые проваливаются)
+- mentions any of the eight archetypes — Limits to Growth/Success, Shifting the Burden (or its Addiction variant), Fixes That Fail, Drifting Goals, Escalation, Growth and Underinvestment, Success to the Successful, Tragedy of the Commons (or Russian equivalents: Пределы роста/успеха, Подмена проблемы / Зависимость, Решения которые проваливаются, Дрейф целей, Эскалация, Рост и недоинвестирование, Успех успешным, Трагедия общин)
 - asks for leverage points / Meadows leverage
 - preps a model for W3 simulation
 - asks "is this really a stock?" / "did I draw the loop correctly?"
@@ -66,7 +66,7 @@ After the user answers, deliver:
 
 1. **Grammar validation** — for each entity: is it really a stock or flow? Do units match? 1–2 sentences per entity.
 2. **Implicit assumptions** (3–5) — "Assumption: <one sentence>. Reality: <one sentence>." Focus on linearity vs. thresholds, independence vs. coupling, constants vs. functions.
-3. **Archetype matching** — walk all three archetypes (matches / doesn't / partial + why). Verdict: "Match: <archetype>, confidence <high|medium|low>" + canonical structure mapped onto user's variables. OR "No clear archetype" + what is missing. **Do not force-fit.**
+3. **Archetype matching** — run the decision tree (below) internally to narrow the field; do NOT march the user through all archetypes. Present the single best match (or two only if it is a genuine toss-up): "Match: <archetype>, confidence <high|medium|low>" + the canonical structure mapped onto the user's variables. Name the runner-up in one line only if it is close. If nothing fits, say "No clear archetype" + what structure is missing. **Do not force-fit.**
 
 End Phase B with one sentence: *"Does this match your intuition? Ready to dive into leverage points and trajectory, or pause here?"*
 
@@ -91,7 +91,7 @@ If the user says "give me everything", "skip questions", "express mode", or simi
 
 ## Archetype catalog
 
-### Limits to Growth
+### Limits to Growth (a.k.a. Limits to Success)
 - R: stock grows via positive feedback.
 - B with delay: a constraint (resource / capacity / saturation) activates as the stock grows.
 - Pattern: exponential growth → plateau or rollback.
@@ -104,6 +104,7 @@ If the user says "give me everything", "skip questions", "express mode", or simi
 - Fundamental B2: solves the root, but slowly.
 - Side effect: quick fix erodes the capability to apply the fundamental (atrophy).
 - Pattern: dependence on quick fix grows, fundamental dies.
+- Variant — Addiction: the side-effect becomes so entrenched it overwhelms the original symptom (the fix is now the problem).
 - Leverage: invest in B2, tolerate symptom temporarily.
 
 ### Fixes that Fail
@@ -114,14 +115,68 @@ If the user says "give me everything", "skip questions", "express mode", or simi
 - Difference from Shifting the Burden: here the fix itself does harm.
 - Leverage: slow down, find the unintended loop.
 
+### Drifting Goals (a.k.a. "Boiled Frog")
+- A goal/standard + B1 corrective action (raises actual toward goal, with delay) + B2 lower-the-goal (under pressure, fast).
+- Lowering the goal closes the gap instantly while corrective action takes time, so pressure erodes the goal.
+- Pattern: goal and performance drift steadily downward (or upward for a "bad" metric), unnoticed.
+- Tell: a target/standard variable that is itself a function of past performance.
+- Leverage: anchor the goal to something outside the system (absolute standard); make corrective action faster.
+
+### Escalation
+- Two parties; each acts on a RELATIVE measure (A's position relative to B).
+- B1: A acts to improve its position → lowers B's → B2: B acts to restore → raises threat to A. Figure-8; net reinforcing.
+- Pattern: mutually amplifying buildup (arms race, price war, insult match).
+- Tell: a relative/comparative variable + threat + retaliation; nobody feels in control.
+- Leverage: change or abandon the relative measure; unilateral de-escalation; find a larger shared goal.
+
+### Growth and Underinvestment
+- Limits to Growth (R1 growth + B2 limit) PLUS B3: as performance dips, a performance standard / perceived-need-to-invest is lowered, so capacity is under-built (with delay).
+- Underinvestment makes performance worse, which justifies still less investment.
+- Pattern: growth stalls not because the limit is fixed, but because capacity was never built ahead of demand.
+- Tell: a capacity-investment decision driven by a standard set from PAST (not future) performance; long delays.
+- Leverage: invest in capacity ahead of demand; anchor the standard to potential demand, not history.
+- Special case of Limits to Growth — check this BEFORE plain LtG.
+
+### Success to the Successful
+- Two reinforcing loops (R1, R2) compete for one limited resource; allocation goes to A instead of B.
+- A's early success → more resources to A → more success; B is starved → declines.
+- Pattern: winner-take-all; outcome locked by initial conditions, not true ability.
+- Tell: two growers + one shared finite resource + an allocation rule that "bets on the winner."
+- Difference from Tragedy of the Commons: here a deliberate allocator splits between TWO; ToC is many actors with no allocator.
+- Leverage: question whether you need a single winner; define success above the level of A and B; make them collaborators.
+
+### Tragedy of the Commons
+- Many independent actors, each with a reinforcing individual-gain loop, drawing on a SHARED finite resource.
+- Total activity grows → per-individual gain collapses (balancing loops B) as the commons overloads; delay hides it until too late.
+- Pattern: rational individual action → collective ruin.
+- Tell: a shared "commons" + 2+ independent actors + no one accountable for the whole.
+- Leverage: make the collective loss real and immediate to individuals; a governing body that manages the resource limit.
+
+### Balancing loop with delay (underlying pattern, not a full archetype)
+- A single balancing loop with a significant delay overshoots and oscillates (supply-demand cycles, a seesaw).
+- Underlies Escalation and supply chains. If behavior oscillates and you see one B-loop + long delay, name the delay as the cause — do not force a named archetype.
+
 ### Decision tree (use in this order)
 
-1. Are there TWO solution loops, where one erodes the capability to apply the other? → **Shifting the Burden**.
-2. Else, is there a DELAY between fix and a negative consequence that worsens the SAME variable? → **Fixes that Fail**.
-3. Else, is there a reinforcing R-loop running into an external/structural limit? → **Limits to Growth**.
-4. Else → "No clear archetype."
+Run these checks internally, in order. Stop at the first match. Specific structures come before general ones.
 
-If the main dynamic is GROWTH hitting an external limit, it is LtG, not StB. Shifting the Burden requires `capability` / `skill` / `ownership` to be eroding.
+1. **2+ independent actors** each pursuing individual gain from a SHARED finite resource, and aggregate use degrades it for all? → **Tragedy of the Commons**.
+2. **Two parties driven by a RELATIVE measure** (A relative to B), each escalating in response to the other (threat → retaliation)? → **Escalation**.
+3. **Two reinforcing loops competing for one limited resource**, allocation to A starving B? → **Success to the Successful**.
+4. **Two solution loops for one symptom**, where the quick fix erodes the capability/desire to apply the fundamental? → **Shifting the Burden** (→ **Addiction** if the side-effect has become the dominant problem).
+5. **A single fix** relieving a symptom but triggering a delayed R-loop that worsens the SAME symptom? → **Fixes That Fail**.
+6. **A goal/standard that erodes** — the gap is closed by lowering the goal, not raising the actual? → **Drifting Goals**.
+7. **Reinforcing growth into a limit, where capacity is deliberately under-built** (an investment loop with a standard set from past performance)? → **Growth and Underinvestment**.
+8. **Reinforcing growth into an external/structural limit** (no underinvestment loop)? → **Limits to Growth / Limits to Success**.
+9. **One balancing loop + long delay, behavior oscillates** (no other structure)? → name the delay (balancing-loop-with-delay), not a full archetype.
+10. Else → **"No clear archetype."**
+
+Tie-breakers:
+- GROWTH hitting an external limit is LtG, not Shifting the Burden. Shifting the Burden requires a `capability` / `skill` / `ownership` variable that is eroding.
+- LtG vs Growth & Underinvestment: if a capacity/investment DECISION (driven by a standard from past performance) is what caps growth, it is G&U; if the limit is exogenous and fixed, it is LtG.
+- Drifting Goals vs Fixes that Fail: Drifting Goals erodes the GOAL (the reference); Fixes that Fail worsens the ACTUAL via a side-effect.
+- Success to the Successful vs Tragedy of the Commons: StS = a deliberate allocator splitting one resource between TWO growers; ToC = many actors overusing a commons with no allocator.
+- Escalation vs Success to the Successful: Escalation runs on a relative/threat measure (two balancing loops, net-reinforcing figure-8); StS runs on resource allocation (two reinforcing loops).
 
 ## Two-block diagram rules
 
@@ -231,7 +286,7 @@ flowchart LR
 - Word-of-mouth is independent of quality → reality: bad quality = anti-WoM.
 - No competition → reality: AI accounting can cut inflow 50-70%.
 
-**3. Archetype: Limits to Growth, high confidence.** R dominates first 4-6 mo → B (capacity) catches up → plateau. Not Shifting the Burden (no quick-fix vs. fundamental pair). Not Fixes that Fail (no fix loop with unintended R).
+**3. Archetype: Limits to Growth, high confidence.** R dominates first 4-6 mo → B (capacity) catches up → plateau. Not Shifting the Burden (no quick-fix vs. fundamental pair). Not Fixes that Fail (no fix loop with unintended R). Watch the boundary with Growth & Underinvestment: if Stanislav actively chooses not to hire ahead of demand (a capacity-investment loop gated on past load), it tips into G&U — the 3-mo hiring delay is the tell.
 
 *Does this match your intuition? Want me to dive into leverage and trajectory, or pause to revise?*
 

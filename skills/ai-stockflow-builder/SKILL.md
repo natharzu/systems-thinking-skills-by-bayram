@@ -1,6 +1,6 @@
 ---
 name: ai-stockflow-builder
-description: Commission an interactive stock-flow simulation web app from your AI coding agent (Claude Code or Codex). Use when the user wants to turn a hand-drawn or W2-graded stock-flow diagram into a runnable simulation with sliders. Triggers on Russian and English requests like "построй симуляцию моей модели", "сделай симуляцию из диаграммы", "build a simulation of my stock-flow model", "turn my diagram into code", "сделай интерактивную модель", "stock-flow simulation app", "system dynamics simulator". Refuses to invent equations, parameters, or model structure - those come from the human's diagram. Refuses to ship code without a successful hand-computed extraction test.
+description: Commission an interactive stock-flow simulation web app from your AI coding agent (Claude Code or Codex). Use when the user wants to turn a hand-drawn or W2-graded stock-flow diagram into a runnable simulation with sliders. Triggers on Russian and English requests like "построй симуляцию моей модели", "сделай симуляцию из диаграммы", "build a simulation of my stock-flow model", "turn my diagram into code", "сделай интерактивную модель", "stock-flow simulation app", "system dynamics simulator". Refuses to invent equations, parameters, or model structure - those come from the human's diagram. Gates on a measurable, time-bound goal carrying a contradiction (an antagonist to the key parameter) before building - a model with no contradiction is arithmetic, not system dynamics. Refuses to ship code without a successful hand-computed extraction test.
 argument-hint: [optional: paste model spec or "interview me"]
 allowed-tools:
   - Read
@@ -72,14 +72,30 @@ If the user:
 8. **In Phase 0 (interview), refuse to propose entities.** You ask; they decide. If they say "you pick", redirect to the Socratic test. The whole point is they leave Phase 0 with a model THEY built, not one you built.
 9. **Augment the brief's iron constraints when the model demands it.** The canonical brief defaults to "clamp stocks at zero". If the user's model implies a natural ceiling (a budget, a percentage, a finite capacity, a cap), augment the brief's iron-constraints section with an explicit max-clamp instruction (e.g., "Focus stays in [0, 100]"). Same for periodic functions (e.g., `t % 7 >= 5` for weekend cycles), discrete events (e.g., `t == HireWeek`), or conditional flow rates. Do not silently drop a model requirement because the canonical template doesn't already cover it.
 10. **Reference-mode reality check before emitting brief.** In Phase A, after readback, mentally compute one or two steps with default parameters and ask: "does this trajectory match your reference mode?" If a participant says "we lose 1 client/week" but their default-parameter math produces 0.1 clients/week, surface the calibration gap before you emit the brief. This is the single most important sanity check.
+11. **Goal before model, contradiction before build (Gate 0).** No build starts without a goal that is measurable, time-bound, and carries a contradiction — a visible "but". The model must contain an *antagonist* of the key parameter: a dial that pushes the opposite way. If one parameter determines the outcome, the contradiction is unmodeled — name the antagonist or stop. A model with no contradiction is arithmetic; say so and offer a spreadsheet instead of a simulation.
 
 ## Pedagogical flow (default: interactive, multi-turn)
 
 Default is three phases (A → B → C). If the user does not have a diagram and opts in, prepend **Phase 0 — Interview** before Phase A. The goal is the user *thinks alongside you* — never pastes prompts blindly.
 
+### Gate 0 — Goal & contradiction (run this BEFORE the entry question)
+
+Sterman: a model is built for a goal. A stock-flow simulation earns its complexity only when the decision is *hard* — when parameters pull against each other and you must find a lever, not just compute. Establish two things before Pass 1/2:
+
+**1. The goal.** Measurable (a number), time-bound (by when), and carrying a contradiction — a visible "but". Reject vague goals and fix them on the spot:
+- "understand how the system works" → bloats forever. Ask: what decision does it inform?
+- "improve X" / "grow the business" → not concrete. Ask for the number and the deadline.
+- "1000 active users" with no constraint → add the constraint ("...profitably, at CAC ≤ X") and the contradiction appears.
+
+Heuristic: if the goal already shows a "but", it is modelable. If not, add a constraint and the contradiction surfaces. Example: "Lower churn from X to Y *while cash-in-inventory stays ≤ Z*."
+
+**2. The contradiction (antagonist test).** Name the key parameter, then ask: what pushes the OPPOSITE way? If turning the key dial the "good" direction costs nothing elsewhere, the contradiction is unmodeled and the model is arithmetic. The tell: one parameter obviously determines the outcome ("just lower churn"). Probe: *"what do you fear if you simply turn that dial all the way?"* — the fear names the antagonist (a wider stock lowers churn but eats cash; full delegation frees time but risks client errors). The contradiction usually IS an archetype — Shifting the Burden / Fixes that Fail = short-term vs long-term; if `/ai-systems-coach` already named one, you have the contradiction.
+
+If after this probe there is still no contradiction, say so plainly: *"This is a calculation, not a simulation — a spreadsheet answers it. A stock-flow model earns its complexity only when parameters fight."* Build only if the user still wants the dynamic view, and warn it will likely show a trivial monotone curve.
+
 ### Entry question: simplified or full?
 
-**The very first thing you ask** (before Phase 0 or Phase A) is whether this is a *simplified* (Pass 1) or *full* (Pass 2) build. Use the structured-question tool with options:
+**Right after Gate 0** (before Phase 0 or Phase A) ask whether this is a *simplified* (Pass 1) or *full* (Pass 2) build. Use the structured-question tool with options:
 
 - **Pass 1 — Simplified** (1 stock, 2 flows, 2 parameters, ≤30 time steps, no conditionals/delays/`min()`). For first-time builds; for workshop pass 1; for getting end-to-end working before adding complexity.
 - **Pass 2 — Full** (no caps). For extending a Pass 1 model; for cases the user already knows are multi-stock; for repeat users.
@@ -159,6 +175,7 @@ After readback, surface 1-3 highest-leverage clarifying questions whose answers 
 - Are these parameters **constants** for the simulation, or do they change over time? Is there a **periodic** function involved (weekly cycle, seasonal effect)?
 - For each stated relationship: is it **linear**, **threshold**, **saturating**, or **exponential**? Don't assume linear.
 - **Reference-mode reality check:** with default parameters, mentally compute one step. Does the resulting rate of change match what the user described historically? If 10× off, calibration is wrong; surface the gap.
+- **Antagonist present?** The Gate 0 contradiction must appear as *structure*, not just narrative — confirm the model contains a parameter that pushes opposite to the key one. If the key parameter has no in-model antagonist, pause: the simulation will produce a trivial monotone curve. Add the antagonist, or drop to a spreadsheet.
 
 End Phase A with: *"Confirm the readback (or correct it). Once you've found at least one thing to fix or clarify, we'll write the commissioning brief."*
 

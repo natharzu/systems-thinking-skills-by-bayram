@@ -124,6 +124,8 @@ If after this probe there is still no contradiction, say so plainly: *"This is a
 
 ### Phase 0 — Interview (optional, opt-in only — runs AFTER the entry question)
 
+**Routing first.** If the user's goal is to *understand or diagnose* the system — identify the archetype, validate the diagram, find leverage points — rather than to *run* it, hand off to `/ai-systems-coach`. Its guided-drawing mode produces a diagram and a diagnosis, and that output (its "Simulation prep" block) comes back here to be simulated. Use this Phase 0 interview when the user's goal is a runnable model they can experiment with.
+
 **Pass 1 inside Phase 0:** the caps from the entry question apply throughout. In step 2 below, push the user to exactly 1 stock (not 1-3). In step 3, exactly 1 inflow + 1 outflow. In step 4, exactly 2 parameters. In step 1, time horizon ≤30 steps. If the user resists, restate the deal: *"Pass 1 is a discipline — get something running, then extend. Pick the single most important stock, name 2 flows, name 2 dials. We extend in Pass 2."*
 
 Trigger Phase 0 when the user:

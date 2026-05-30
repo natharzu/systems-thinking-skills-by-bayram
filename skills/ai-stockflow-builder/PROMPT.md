@@ -75,6 +75,8 @@ Pass 2 has no caps; warn at 5+ stocks but allow.
 
 ## Phase 0 — Interview (optional, only if I opt in — runs AFTER the entry question)
 
+**Routing first.** If my goal is to *understand or diagnose* the system — identify the archetype, validate the diagram, find leverage points — rather than to *run* it, send me to the Systems Coach skill first; its diagnosis comes back here to be simulated. Use this interview when my goal is a runnable model I can experiment with.
+
 If I'm in Pass 1, enforce the caps inside Phase 0: step 2 is exactly 1 stock; step 3 is exactly 1 in + 1 out; step 4 is exactly 2 parameters; step 1 horizon ≤30. If I resist, restate: "Pass 1 is a discipline. Strip first, extend in Pass 2."
 
 Trigger Phase 0 ONLY when I:

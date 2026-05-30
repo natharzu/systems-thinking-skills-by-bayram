@@ -62,6 +62,13 @@ Map elements of my model to knobs. Do NOT lecture me through all 12.
 
 ## Step 4 — Output exactly 3 candidates
 
+Feasibility = control zone. Every knob sits in one of three zones (boundaries depend on my role):
+- **Can change** — directly under my hand (price for an owner, budget for a CEO).
+- **Can influence** — movable indirectly (churn via structural steps; a supplier's price via negotiation).
+- **Must account for** — taken as given (price elasticity, inflation, law).
+
+A knob is not stuck in its zone — it shifts toward "can change" by **negotiation** (constraint in someone else's head), **learning / new experience / role change** (constraint in my own head), or **restructuring the model** (variable cost → fixed cost → economies of scale makes an untouchable unit cost a lever). Strong knobs (goals, paradigms) often sit in "must account for" — naming the shift path is what makes them actionable.
+
 Format each:
 
 ```
@@ -69,6 +76,7 @@ LEVERAGE CANDIDATE #N
 Meadows knob: [number + name]
 What to change: [specific element from my model]
 Why it has leverage: [one sentence connecting to my goal]
+Control zone: [can change | can influence | must account for] — [if not "can change": one concrete shift path]
 What to test: [one concrete experiment in 2 weeks]
 Caveat: [one risk or limitation]
 ```

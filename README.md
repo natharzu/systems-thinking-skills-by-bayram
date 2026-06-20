@@ -91,6 +91,18 @@ The LLM already knows TRIZ, so the skill doesn't re-teach it. It does two things
 
 The W6 pair is designed to compose: `/constraint-finder` locates the wall, `/triz-dissolve` moves it.
 
+### `/why-tree` — Build the evidence-graded Current-Reality Tree *(power instrument)*
+
+**You bring a hard, contested problem. The skill builds the evidence and finds where the wall even is.**
+
+Where `/constraint-finder` takes a system you've *already* mapped, `/why-tree` is the heavyweight, **multi-agent** instrument for a messy problem you *haven't* — it fans 20-55 AI agents across the branch-space, grades every node by the kind of evidence behind it (MEASURED / INFERENCE / CLAIM / HYPOTHESIS…), tries to **refute its own load-bearing branches**, and converges on the ONE constraint — plus the negative branches (fixes that backfire) and the single cheapest test that would fork-decide. Output: a self-contained interactive HTML tree + a one-page decision doc. The natural chain is **`/why-tree` → `/constraint-finder`**: this locates and evidences the constraint; constraint-finder gives the focusing steps.
+
+**Unlike the course skills above, this one does NOT refuse to do the thinking** — it's a power tool, token-heavy by design (Standard ~20-36 agents; Deep ~30-55) and it **requires Claude Code's multi-agent `Workflow` tool** (the included `PROMPT.md` is a degraded single-context fallback). It gates on a depth + token-cost choice before launching, and it tells you when *not* to reach for it: a clear-cut problem a single careful pass would nail — just ask one agent.
+
+**Structural rules:** grade every node (no ungraded assertions); refute before trust (a degraded/zeroed refute pass is loudly flagged); converge to ONE constraint; the apex is a declarative *statement*, never a question or a smuggled solution; an honest census ("a map, not a verdict" when the decisive nodes are unmeasured); the constraint branch drilled to bedrock as a multi-level chain.
+
+**Refuses:** to ship five co-equal roots, to delete refuted branches, to run the full workflow on a problem one agent would nail, or to state a confident verdict on HYPOTHESIS-graded nodes without disclosing it.
+
 ## Installation
 
 The skills follow the [agentskills.io](https://agentskills.io) open standard — installable in both Claude Code and OpenAI Codex with the same `SKILL.md` files.

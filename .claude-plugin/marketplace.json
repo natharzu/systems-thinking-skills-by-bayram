@@ -28,6 +28,11 @@
       "name": "triz-dissolve",
       "source": "./",
       "description": "Take a trade-off ('improving X worsens Y') and dissolve it with TRIZ — act as the contradiction matrix over the full 40 inventive principles + separations + resource analysis, while enforcing the discipline the LLM skips: physical-contradiction reframing, Ideal Final Result, structure-vs-physics, and a dissolve-vs-relocate test on every resolution. Refuses to return 'find the optimal balance', to fake a dissolution for a real law, or to call a cost-relocation a dissolution."
+    },
+    {
+      "name": "why-tree",
+      "source": "./",
+      "description": "Build an evidence-graded Goldratt Current-Reality Tree for a hard, contested problem: fan 20-55 AI agents across the branch-space, grade every node by the kind of evidence behind it, refute the weak branches, and converge on the ONE system constraint plus the cheapest test that would prove it. A heavyweight, multi-agent power instrument (needs Claude Code's Workflow tool) — not a course-pedagogy critic. Gates on a depth + token-cost choice before launching. Pairs with constraint-finder, which returns the 5 Focusing Steps once the constraint is located."
     }
   ]
 }

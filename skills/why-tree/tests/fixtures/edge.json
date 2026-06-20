@@ -1,0 +1,131 @@
+{
+  "apex": "Why do <50% of \"activated\" users return in week 2? & other escaping tests \ud83c\udfaf",
+  "provenance": {
+    "method": "Goldratt CRT",
+    "depth": "deep",
+    "agents": 29,
+    "date": "test-edge"
+  },
+  "corrections": [
+    "\"It's a pricing problem\" \u2014 REFUTED. Escaping check: <b>not bold</b> & \"quoted\" should display literally."
+  ],
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Stage 1 \u00b7 Arrive & <Connect>",
+      "nodes": [
+        {
+          "id": "A",
+          "text": "A deliberately very long node statement to test wrapping and overflow inside a summary row, with a mid-sentence clause that keeps going well past a comfortable line length so we can see whether the chips wrap gracefully or collide with the statement on both narrow and wide viewports",
+          "kind": "MEASURED",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "n=1,234, 30d window; contains <html> & \"quotes\" \ud83c\udfaf",
+          "children": [
+            {
+              "id": "A1",
+              "text": "Nested level-2 child",
+              "kind": "INSTANCE",
+              "grade": "Mod",
+              "cite": "n=3",
+              "children": [
+                {
+                  "id": "A1a",
+                  "text": "Nested level-3 child (depth test)",
+                  "kind": "EXTERNAL",
+                  "grade": "Strong",
+                  "cite": "third-party doc"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "R",
+          "text": "Refuted branch \u2014 should render struck-through and dimmed",
+          "kind": "CLAIM",
+          "grade": "Weak",
+          "role": "REFUTED",
+          "cite": "killed by: 0/74 cross-org evidence"
+        },
+        {
+          "id": "D",
+          "text": "Downgraded branch \u2014 blocker demoted to friction",
+          "kind": "INFERENCE",
+          "grade": "Mod",
+          "role": "DOWNGRADED",
+          "cite": "6/6 had a signer \u2192 reducer, not blocker"
+        }
+      ]
+    },
+    {
+      "id": "X",
+      "title": "Cross-cutting (acts at every stage)",
+      "crosscut": true,
+      "nodes": [
+        {
+          "id": "M",
+          "text": "THE constraint sitting inside a stage (spotlight test)",
+          "kind": "MEASURED",
+          "grade": "Strong",
+          "role": "CONSTRAINT",
+          "cite": "0 OKR rows own this; <escaping> & \"test\""
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Ownership gap (policy) & <escaping>",
+      "from": [
+        "M"
+      ],
+      "action": "Name a DRI & re-comp",
+      "isConstraint": true
+    },
+    {
+      "id": "R1",
+      "title": "Surface mis-positioned for the job",
+      "from": [
+        "A",
+        "A1"
+      ],
+      "action": "Reframe the landing + inline nudge"
+    },
+    {
+      "id": "R2",
+      "title": "Cold-start gives no reason to act",
+      "from": [
+        "D"
+      ],
+      "action": "Seed the empty state on connect"
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "Located policy constraint. Escaping: <x> & \"y\". Needs no more data.",
+    "unlocated": "The funnel/mechanism constraint is still UNLOCATED \u2014 one query pins it."
+  },
+  "negatives": [
+    "Auto-do the thing to boost the metric \u2192 backfire with <special> & degenerate artifacts"
+  ],
+  "tests": [
+    {
+      "test": "One join that decides arrival-starved vs leak",
+      "decides": "Adjudicates A, M at once",
+      "rank": "#1"
+    }
+  ],
+  "census": {
+    "measured": 0.4,
+    "inference": 0.2,
+    "hypothesis": 0.25,
+    "instance": 0.1,
+    "claim": 0.05,
+    "external": 0,
+    "bottomLine": "Hypothesis-heavy at the decision point. Map, not verdict. <escaping> & \"test\" \ud83c\udfaf."
+  },
+  "verdict": "Verdict line: this is the one-line ANSWER, rendered in amber under the apex. Escaping here too: <b> & \"x\"."
+}

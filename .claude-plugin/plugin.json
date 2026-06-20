@@ -1,7 +1,7 @@
 {
   "name": "systems-thinking-skills",
-  "description": "Claude Code skills for systems thinking: stock-flow / causal-loop diagram critique with archetype identification (W2), stock-flow simulation commissioning (W3 \u2014 emit a brief that your AI agent uses to build an interactive HTML simulation app), Meadows leverage-point mapping for a stated goal (W4), and the W6 'redraw the box' pair \u2014 Goldratt Theory-of-Constraints constraint-finding and Altshuller TRIZ contradiction-dissolving. From the AI + Systems Thinking course (Empatika).",
-  "version": "0.8.0",
+  "description": "Claude Code skills for systems thinking: stock-flow / causal-loop diagram critique with archetype identification (W2), stock-flow simulation commissioning (W3 \u2014 emit a brief that your AI agent uses to build an interactive HTML simulation app), Meadows leverage-point mapping for a stated goal (W4), and the W6 'redraw the box' pair \u2014 Goldratt Theory-of-Constraints constraint-finding and Altshuller TRIZ contradiction-dissolving. Plus why-tree: a heavyweight multi-agent Goldratt Current-Reality-Tree instrument that builds an evidence-graded causal tree and converges on the one binding constraint. From the AI + Systems Thinking course (Empatika).",
+  "version": "0.9.0",
   "author": {
     "name": "Bayram Annakov",
     "email": "bayram@onsa.ai"
@@ -18,6 +18,10 @@
     "leverage-points",
     "theory-of-constraints",
     "goldratt",
+    "current-reality-tree",
+    "why-tree",
+    "root-cause-analysis",
+    "multi-agent",
     "five-focusing-steps",
     "triz",
     "altshuller",

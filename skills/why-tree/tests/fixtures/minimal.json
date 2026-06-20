@@ -1,6 +1,6 @@
 {
   "apex": "Why do most personal OKRs get abandoned by week 3?",
-  "provenance": { "method": "Goldratt CRT", "depth": "quick", "agents": 5, "date": "test-minimal" },
+  "provenance": { "method": "Goldratt CRT", "depth": "standard", "agents": 5, "date": "test-minimal" },
   "stages": [
     { "id": "S1", "title": "Stage 1 · Set", "nodes": [
       { "id": "A", "text": "Goals are framed as outcomes, not weekly behaviors", "kind": "INFERENCE", "grade": "Mod", "role": "LEVER", "cite": "reasoning only (smoke fixture)" },

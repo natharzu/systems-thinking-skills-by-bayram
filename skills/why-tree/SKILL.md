@@ -49,14 +49,14 @@ Before launching, enumerate what the research agents may actually read - this de
 
 - **Web** - Exa (`mcp__exa__*`, `mcp__exa-research__*`) and/or the `firecrawl` skill for competitive/external facts, market data, public docs.
 - **Local files / data the user names** - a folder, a CSV/JSON export, prior reports, transcripts, DB query results. Ask for paths.
-- **Live data** - if a DB or API is reachable and the user authorizes it, agents can run their own reads (this is what produced the "6/6 sends had a signer" refutation in the source case).
+- **Live data** - if a DB or API is reachable and the user authorizes it, agents can run their own reads (this is what produced the "6/6 sampled accounts had a 2nd seat" refutation in the source case).
 - **Prior runs (anti-contamination)** - if a previous Why Tree exists for the SAME problem, you may reuse its **frozen evidence brief** (the Phase-1 facts), but do NOT read its decision-doc / tree / verdict. Reading the prior *conclusion* anchors the lenses and leaks (a converge agent once copied "171 agents" from a prior doc straight into its output). Re-derive from evidence, never from the old answer.
 
 **Compute the hard metrics FIRST.** For data-grounded problems, actually pull/compute the key numbers in Phase 1 (run the query, read the files) and pass them into the workflow as a **frozen evidence brief** with "do NOT re-query". This grounds nodes as MEASURED instead of HYPOTHESIS, and stops N parallel agents from re-hammering the same DB/API. Pull shared/expensive evidence ONCE.
 
 **Measurable-in-hand gate (do not skip).** Before any node is graded HYPOTHESIS or CLAIM, ask: *"would one more query/read over evidence I have ALREADY pulled settle this?"* If yes, it is **not** a HYPOTHESIS — run the check and grade it MEASURED. A node that is cheaply measurable from in-hand data but left unmeasured is a worse failure than a genuinely-external unknown, and they must not be lumped together. Split the "(verify first)" tag into **(one query on data in hand)** vs **(needs new external data)** — only the latter is a legitimate cheapest-test; the former you just *do*.
 
-**Distribution-behind-threshold rule.** Whenever you compute a funnel step as a *threshold* (≥N, hit-the-wall, activated, churned), also pull the **distribution** of the underlying quantity before making any causal claim about why people don't cross it. "83% never hit the 50-lead wall" is silent on whether they died at 5 leads or 48 — opposite diagnoses with opposite fixes. A threshold count may not carry a causal claim the distribution would overturn.
+**Distribution-behind-threshold rule.** Whenever you compute a funnel step as a *threshold* (≥N, hit-the-wall, activated, churned), also pull the **distribution** of the underlying quantity before making any causal claim about why people don't cross it. "83% never hit the 50-seat wall" is silent on whether they died at 5 of 50 or 48 of 50 — opposite diagnoses with opposite fixes. A threshold count may not carry a causal claim the distribution would overturn.
 
 Write a one-line **measurability note**: *"X and Y are queryable; the decisive number Z is not in any source we have - it will stay HYPOTHESIS and become the #1 cheapest-test."* This honesty is the point - it tells the user what the tree can and cannot settle.
 
@@ -82,10 +82,10 @@ Save the JSON to disk (e.g. `why-tree-output.json`) before visualizing, so a fai
 
 ## Phase 3 - Visualize (invoke `frontend-design`)
 
-Render the tree JSON into a **single self-contained HTML file** using `assets/tree-template.html` as the scaffold. **Invoke the `frontend-design` skill** for the aesthetic pass - this is the user's explicit ask: the visualization must be distinctly designed, not the GitHub-default look of the original artifact.
+Render the tree JSON into a **single self-contained HTML file** using `assets/tree-template.html` as the scaffold. **Invoke the `frontend-design` skill** for the aesthetic pass - this is the user's explicit ask: the visualization must be distinctly designed, not the GitHub-default look of the original artifact. (frontend-design is an external Anthropic-provided skill; if it is not installed, `assets/tree-template.html` still renders standalone and the aesthetic pass is optional.)
 
 Requirements the visualization must hit:
-- **A prominent one-line `verdict`** rendered under the apex (the answer; the apex is just the question).
+- **A prominent one-line `verdict`** rendered under the apex (the answer; the apex states the problem).
 - **Collapsible, evidence-rich nodes** that stay readable at 25+ nodes (indented disclosure tree, expand/collapse-all).
 - **Per-node chips**: answer-kind (color-coded), confidence grade, role badge (ROOT / CONSTRAINT / LEVER / NEGATIVE / REFUTED / DOWNGRADED), and the citation on expand.
 - **A constraint "spotlight"** - the single system constraint is visually unmistakable.

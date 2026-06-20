@@ -1,0 +1,98 @@
+{
+  "apex": "Smoke: does the plumbing flow end to end?",
+  "provenance": {
+    "method": "Goldratt CRT",
+    "depth": "plumbing-stub",
+    "agents": 3,
+    "date": "test"
+  },
+  "stages": [
+    {
+      "id": "S0",
+      "title": "Stage 1 · Arrive",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "F",
+          "text": "[funnel] a cause this lens sees",
+          "stage": "Stage 1 · Arrive",
+          "kind": "MEASURED",
+          "grade": "Mod",
+          "cite": "canned n=10",
+          "children": [
+            {
+              "text": "[funnel] a cause this lens sees — why?",
+              "kind": "INFERENCE",
+              "grade": "Weak",
+              "cite": "canned one level"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S1",
+      "title": "Cross-cutting",
+      "crosscut": true,
+      "nodes": [
+        {
+          "text": "shared cross-cutting cause (overlaps across lenses)",
+          "stage": "Cross-cutting",
+          "kind": "HYPOTHESIS",
+          "grade": "Weak",
+          "cite": "canned",
+          "children": [
+            {
+              "text": "shared cross-cutting cause (overlaps across lenses) — why?",
+              "kind": "INFERENCE",
+              "grade": "Weak",
+              "cite": "canned one level"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Stubbed system constraint (policy)",
+      "from": [
+        "F"
+      ],
+      "action": "name a DRI",
+      "isConstraint": true
+    },
+    {
+      "id": "R1",
+      "title": "Stubbed secondary root",
+      "from": [],
+      "action": "fix surface"
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "Located (stub).",
+    "unlocated": "Mechanism unlocated (stub)."
+  },
+  "negatives": [
+    "stubbed backfire"
+  ],
+  "tests": [
+    {
+      "test": "the one cheap query",
+      "decides": "forks the verdict",
+      "rank": "#1"
+    }
+  ],
+  "census": {
+    "measured": 0.4,
+    "inference": 0.4,
+    "hypothesis": 0.2,
+    "instance": 0,
+    "claim": 0,
+    "external": 0,
+    "bottomLine": "stub census"
+  }
+}

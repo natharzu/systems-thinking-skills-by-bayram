@@ -12,7 +12,7 @@ Four tiers, ordered cheapest-first. **T1 + T2 cost zero LLM tokens** and validat
 ## What each tier does NOT cover
 - T1 says nothing about whether the *analysis* is good — only that any valid tree displays correctly.
 - T2 stubs the agents — it proves the pipes connect and the schema holds, not that real agents fill them well.
-- T3 proves the engine runs but at Quick depth on a toy problem — not diagnostic quality.
+- T3 proves the engine runs but at smoke depth on a toy problem — not diagnostic quality.
 - Only T4 judges quality, and it's the expensive one — keep it for when the methodology itself is in question, on a problem whose real constraint you already know (so you can score the skill's answer).
 
 ## Fixtures (T1)

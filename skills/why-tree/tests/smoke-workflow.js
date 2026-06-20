@@ -25,7 +25,7 @@ const NODE = { type:'object', properties:{
   grade:{type:'string', enum:['Strong','Mod','Weak']},
   role:{type:'string'}, cite:{type:'string'} }, required:['text','kind','grade'] }
 const TREE = { type:'object', properties:{
-  apex:{type:'string'},          // SHORT question (<=140 chars), NOT the answer
+  apex:{type:'string'},          // SHORT undesirable-effect STATEMENT (<=140 chars), NOT the answer
   verdict:{type:'string'},       // the one-line answer / headline
   stages:{ type:'array', items:{ type:'object', properties:{
     id:{type:'string'}, title:{type:'string'}, crosscut:{type:'boolean'},
@@ -55,7 +55,7 @@ const branches = lensOut.filter(Boolean).flatMap(r => r.branches)
 phase('Converge')
 const tree = await agent(
   `Branches:\n${JSON.stringify(branches)}\n${NO_WEB}\n` +
-  `Keep apex a SHORT question; put the one-line answer in verdict. ` +
+  `Keep apex a SHORT statement (not a question); put the one-line answer in verdict. ` +
   `Bucket into stages, collapse to 3-5 roots, name THE single constraint, list negatives + 1-2 cheapest tests, ` +
   `and compute the answer-kind census with an honest bottom line. Return the full tree-JSON.`,
   { label:'converge', phase:'Converge', schema:TREE, effort:'low' })

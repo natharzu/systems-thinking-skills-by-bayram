@@ -10,8 +10,8 @@ The workflow must end by returning an object matching this shape. `assets/tree-t
 
 ```json
 {
-  "apex": "Why are we short of the N target by <date>?",
-  "verdict": "One-line answer / headline (the so-what) - rendered prominently under the apex. apex is the QUESTION; verdict is the ANSWER.",
+  "apex": "Net-new signups are short of the N target by <date>",
+  "verdict": "One-line answer / headline (the so-what) - rendered prominently under the apex. apex is the STATEMENT of the undesirable effect; verdict is the ANSWER.",
   "depth": "standard",
   "stages": [
     {
@@ -44,8 +44,8 @@ The workflow must end by returning an object matching this shape. `assets/tree-t
     "statement": "System constraint = ownership/policy; located, needs no more data.",
     "unlocated": "Mechanism constraint still unlocated - one query pins it." },
   "negatives": [
-    "Auto-remove the human gate -> non-completable artifacts + RBAC collisions",
-    "Keystone on a behavior the data says doesn't exist (0/74)"
+    "Auto-invite a user's whole contact list -> spam complaints + a deliverability cliff",
+    "Keystone on a behavior the data says doesn't exist (0 of 80 trials did it)"
   ],
   "tests": [
     { "test": "Join origin -> completion + signup-date (1 query)",
@@ -247,6 +247,6 @@ return converged
   - `NODE_TREE_SCHEMA` = a single branch object that REQUIRES top-level `kind`/`grade` (+ optional `lensCount`) and a recursive `children:[NODE]` (used by deepen + the constraint drill); `VERDICT_SCHEMA` = `{refuted:boolean, demote:boolean, evidence:string}`; `TREE_JSON_SCHEMA` = the strict schema above (its `roots[].children` is what makes the tree multi-level — do not drop it).
 - **Standard** = 6 lenses, 1-vote refute, one-level deepen + constraint drill. **Deep** = 9 lenses, 3-vote refute, loop-until-dry + constraint drill. (Quick was REMOVED — for a cheap gut-check, ask a single agent; this skill only earns its cost when one mind can confidently go wrong.)
 - **Honest agent count** = lenses + deepen(≤`MAX_DEEPEN`) + refute(≤`MAX_REFUTE` × (`REFUTE_VOTES`+1)) + converge + drill. The **refute fan-out is the multiplier**: Standard ≈ **20-36**, Deep ≈ **30-55+**. The "~12-16 / ~25-30" figures in older docs predate the caps and the drill step — SKILL.md's gate now quotes the realistic ranges. The caps bound the worst case (no 171-blowup); they don't make it cheap.
-- For data-grounded problems, name the file paths / DB tables explicitly in `SOURCES` so the deepen/refute agents read them (this is what produced real refutations like "6/6 sends had a signer" in the source case).
+- For data-grounded problems, name the file paths / DB tables explicitly in `SOURCES` so the deepen/refute agents read them (this is what produced real refutations like "6/6 sampled accounts had a 2nd seat" in the source case).
 - Save `converged` to `why-tree-output.json` before rendering, so a render failure never loses the analysis.
 - If the user set a token budget, gate the deep loop on `budget.remaining()`.

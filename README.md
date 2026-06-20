@@ -116,6 +116,7 @@ The skills follow the [agentskills.io](https://agentskills.io) open standard —
 /plugin install leverage-finder@systems-thinking-skills
 /plugin install constraint-finder@systems-thinking-skills
 /plugin install triz-dissolve@systems-thinking-skills
+/plugin install why-tree@systems-thinking-skills
 /reload-plugins
 ```
 
@@ -129,6 +130,7 @@ ln -s ~/.agents/systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/sk
 ln -s ~/.agents/systems-thinking-skills/skills/leverage-finder ~/.agents/skills/leverage-finder
 ln -s ~/.agents/systems-thinking-skills/skills/constraint-finder ~/.agents/skills/constraint-finder
 ln -s ~/.agents/systems-thinking-skills/skills/triz-dissolve ~/.agents/skills/triz-dissolve
+ln -s ~/.agents/systems-thinking-skills/skills/why-tree ~/.agents/skills/why-tree
 ```
 
 Codex auto-discovers skills under `~/.agents/skills/`. See [Codex skills docs](https://developers.openai.com/codex/skills).
@@ -143,12 +145,14 @@ cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.claude/skills/
 cp -r systems-thinking-skills/skills/leverage-finder ~/.claude/skills/
 cp -r systems-thinking-skills/skills/constraint-finder ~/.claude/skills/
 cp -r systems-thinking-skills/skills/triz-dissolve ~/.claude/skills/
+cp -r systems-thinking-skills/skills/why-tree ~/.claude/skills/
 # Or Codex:
 cp -r systems-thinking-skills/skills/ai-systems-coach ~/.agents/skills/
 cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/skills/
 cp -r systems-thinking-skills/skills/leverage-finder ~/.agents/skills/
 cp -r systems-thinking-skills/skills/constraint-finder ~/.agents/skills/
 cp -r systems-thinking-skills/skills/triz-dissolve ~/.agents/skills/
+cp -r systems-thinking-skills/skills/why-tree ~/.agents/skills/
 ```
 
 ### Option 4: Mega-prompt (no skills runtime — plain ChatGPT, Cursor, Claude.ai)

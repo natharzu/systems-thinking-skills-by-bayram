@@ -39,7 +39,7 @@ Goldratt's checklist for validating cause-effect logic. Apply to every load-bear
 
 ## Negative branches (fixes that backfire)
 
-Before recommending action, run each candidate fix forward: *"if we do this, what undesirable new effect appears?"* A fix with a severe negative branch is a trap. Keep these in the tree as **NEGATIVE** nodes - they're often more valuable than the positive recommendations because they stop expensive mistakes. (Source-case examples: auto-send breaks enterprise RBAC and creates non-completable "Sent" docs; keystoning on a behavior the data says doesn't exist; treating an open marketplace as a lock-out.)
+Before recommending action, run each candidate fix forward: *"if we do this, what undesirable new effect appears?"* A fix with a severe negative branch is a trap. Keep these in the tree as **NEGATIVE** nodes - they're often more valuable than the positive recommendations because they stop expensive mistakes. (Examples: auto-inviting a user's whole contact list to boost the metric triggers spam complaints and a deliverability cliff; keystoning a fix on a behavior the data says almost no one does; harder-optimizing the vanity number the real constraint already games.)
 
 ## Cheapest tests (the bridge from tree to action)
 

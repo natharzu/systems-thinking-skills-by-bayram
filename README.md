@@ -65,6 +65,32 @@ When your model violates a Pass 1 cap, the skill runs a **trim conversation** �
 
 **Refuses:** to write the app itself (your agent does), invent missing parameters, deploy, stylize, or run the simulation.
 
+### `/constraint-finder` — Find the binding constraint (Theory of Constraints) *(ships with W6)*
+
+**You bring a flow and a goal. The skill finds the ONE wall — and whether it's a resource or a rule.**
+
+Takes a flow/process system and its goal, finds the single binding constraint, classifies it as a **resource** or (usually) a **policy**, and returns Goldratt's 5 Focusing Steps as concrete actions — Exploit and Subordinate *before* Elevate. This is the **"find the wall"** move.
+
+The error it exists to kill: "find the slow thing and speed it up" — that's profiling, not ToC. The real constraint is almost never a machine; it's a rule, a metric, or an assumption.
+
+**Structural rules:** a goal gate (no throughput unit, no output); a guard that refuses to force a single constraint on a demand-constrained or exploratory system; resource→policy promotion (default suspicion is a policy — far higher leverage than capacity); Exploit/Subordinate before Elevate (spending money first is the classic, costly ToC error); and Subordinate kept as the climax (fast resources must be *willing to sit idle*).
+
+**Refuses:** to optimize a non-constraint, to Elevate before Exploit/Subordinate, to proceed without a goal, to call a policy constraint a resource, or to invent steps.
+
+### `/triz-dissolve` — Dissolve a trade-off (TRIZ) *(ships with W6)*
+
+**You bring a trade-off. The skill eliminates the contradiction — it doesn't balance it.**
+
+Takes a trade-off ("improving X worsens Y") and dissolves it with TRIZ: reframe as a physical contradiction, state the Ideal Final Result, then scan the full 40 inventive principles + the 4 separation principles + resource analysis to generate genuinely different structural resolutions — each run through a dissolve-vs-relocate test. This is the **"move the wall"** move.
+
+The LLM already knows TRIZ, so the skill doesn't re-teach it. It does two things: **enforces the discipline the LLM skips** (left alone it defaults to *compromise* and lets cost-relocations pass as solutions), and **directs it to use the full toolkit** ("you ARE the contradiction matrix" — reason over all 40 principles, don't cite hallucination-prone matrix cells).
+
+**Structural rules:** refuse compromise ("find the optimal balance" is never an answer); a structure-vs-physics guard (don't fake a dissolution for a real law — optimize the honest compromise instead); and a dissolve-vs-relocate test on every resolution (did the cost leave the system, or just move to another team / a later time / tech debt?).
+
+**Refuses:** to return a compromise, to present a relocation as a dissolution, to fake-dissolve a real physical law, or to name a principle without showing how it separates the demands.
+
+The W6 pair is designed to compose: `/constraint-finder` locates the wall, `/triz-dissolve` moves it.
+
 ## Installation
 
 The skills follow the [agentskills.io](https://agentskills.io) open standard — installable in both Claude Code and OpenAI Codex with the same `SKILL.md` files.
@@ -76,6 +102,8 @@ The skills follow the [agentskills.io](https://agentskills.io) open standard —
 /plugin install ai-systems-coach@systems-thinking-skills
 /plugin install ai-stockflow-builder@systems-thinking-skills
 /plugin install leverage-finder@systems-thinking-skills
+/plugin install constraint-finder@systems-thinking-skills
+/plugin install triz-dissolve@systems-thinking-skills
 /reload-plugins
 ```
 
@@ -87,6 +115,8 @@ mkdir -p ~/.agents/skills
 ln -s ~/.agents/systems-thinking-skills/skills/ai-systems-coach ~/.agents/skills/ai-systems-coach
 ln -s ~/.agents/systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/skills/ai-stockflow-builder
 ln -s ~/.agents/systems-thinking-skills/skills/leverage-finder ~/.agents/skills/leverage-finder
+ln -s ~/.agents/systems-thinking-skills/skills/constraint-finder ~/.agents/skills/constraint-finder
+ln -s ~/.agents/systems-thinking-skills/skills/triz-dissolve ~/.agents/skills/triz-dissolve
 ```
 
 Codex auto-discovers skills under `~/.agents/skills/`. See [Codex skills docs](https://developers.openai.com/codex/skills).
@@ -99,10 +129,14 @@ git clone https://github.com/BayramAnnakov/systems-thinking-skills.git
 cp -r systems-thinking-skills/skills/ai-systems-coach ~/.claude/skills/
 cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.claude/skills/
 cp -r systems-thinking-skills/skills/leverage-finder ~/.claude/skills/
+cp -r systems-thinking-skills/skills/constraint-finder ~/.claude/skills/
+cp -r systems-thinking-skills/skills/triz-dissolve ~/.claude/skills/
 # Or Codex:
 cp -r systems-thinking-skills/skills/ai-systems-coach ~/.agents/skills/
 cp -r systems-thinking-skills/skills/ai-stockflow-builder ~/.agents/skills/
 cp -r systems-thinking-skills/skills/leverage-finder ~/.agents/skills/
+cp -r systems-thinking-skills/skills/constraint-finder ~/.agents/skills/
+cp -r systems-thinking-skills/skills/triz-dissolve ~/.agents/skills/
 ```
 
 ### Option 4: Mega-prompt (no skills runtime — plain ChatGPT, Cursor, Claude.ai)
@@ -115,6 +149,8 @@ If your runtime doesn't support skills, copy the `PROMPT.md` from each skill's d
 /ai-systems-coach          # paste your hand-drawn diagram in structured form
 /ai-stockflow-builder      # paste your model, or say "interview me" for Phase 0
 /leverage-finder           # paste your model + measurable goal; get 3 ranked leverage candidates
+/constraint-finder         # paste your flow + goal; find the binding constraint + the 5 focusing steps
+/triz-dissolve             # paste a trade-off ("improving X worsens Y"); dissolve the contradiction
 ```
 
 The W2 → W3 progression: run `/ai-systems-coach` after Workshop 2 to grade your archetype homework. Take its "Simulation prep" output and paste it into `/ai-stockflow-builder` after Workshop 3 to build the runnable app.
@@ -130,7 +166,7 @@ Part of the **AI + Systems Thinking** course (6 biweekly online sessions, 2026):
 3. **From Diagram to Simulation** — turning your diagram into runnable code *(ships `/ai-stockflow-builder`)*
 4. **Goal of the Model + Meadows Leverage** — from "I have a model" to "I know which knobs matter" *(ships `/leverage-finder`)*
 5. Optimization + MCP — connecting models to real data
-6. From Understanding to Transformation — meta-framework
+6. **Theory of Constraints + TRIZ** — find the binding constraint, then dissolve the contradiction *(ships `/constraint-finder` + `/triz-dissolve`)*
 
 More skills will land in this repo as later workshops ship.
 
@@ -141,6 +177,7 @@ These skills enforce a strict separation: **humans draw and own equations; AI cr
 - `/ai-systems-coach` ships with W2 (after archetypes are taught by hand) and refuses to design a diagram from scratch
 - `/ai-stockflow-builder` ships with W3 (after stock-flow notation is taught) and refuses to invent equations the human didn't name
 - `/leverage-finder` ships with W4 (after the goal-of-the-model and Meadows asymmetry are taught on cohort cases) and refuses to rank leverage without an explicit, measurable goal
+- `/constraint-finder` and `/triz-dissolve` ship with W6 (after ToC and TRIZ are taught and practiced on a live commons game) and refuse, respectively, to optimize a non-constraint and to return a compromise
 
 The skills also encode the workshop's force-disagreement mechanic. Both refuse to proceed if the user says "looks perfect" — they push back with units, polarity, periodicity, or threshold-vs-linear questions until the user has corrected something. Drawing and disagreeing *are* the act of thinking.
 

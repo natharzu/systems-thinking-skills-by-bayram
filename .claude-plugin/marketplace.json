@@ -18,6 +18,16 @@
       "name": "leverage-finder",
       "source": "./",
       "description": "Map elements of a stock-flow model to Donella Meadows' 12 leverage points, ranked by potential impact for a stated goal. Refuses to invent stocks, flows, or parameters not in the model. Refuses to return a ranking without an explicit, measurable goal. Returns exactly 3 candidates with at least one at knob ≤5 (the asymmetry lesson)."
+    },
+    {
+      "name": "constraint-finder",
+      "source": "./",
+      "description": "Find the ONE binding constraint in a flow/process system using Goldratt's Theory of Constraints, classify it as a resource or (usually) a policy, and return the 5 Focusing Steps as concrete actions — Exploit and Subordinate before Elevate. Refuses to optimize non-constraints, to Elevate before Exploit/Subordinate, to proceed without a goal, or to force a single constraint on a demand-constrained or exploratory system."
+    },
+    {
+      "name": "triz-dissolve",
+      "source": "./",
+      "description": "Take a trade-off ('improving X worsens Y') and dissolve it with TRIZ — act as the contradiction matrix over the full 40 inventive principles + separations + resource analysis, while enforcing the discipline the LLM skips: physical-contradiction reframing, Ideal Final Result, structure-vs-physics, and a dissolve-vs-relocate test on every resolution. Refuses to return 'find the optimal balance', to fake a dissolution for a real law, or to call a cost-relocation a dissolution."
     }
   ]
 }

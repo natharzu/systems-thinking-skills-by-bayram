@@ -10,7 +10,7 @@ A **Why Tree** is 5-Whys grown up. Naive root-causing follows a single thread, s
 
 The output is a **self-contained interactive HTML tree** + a one-page **decision doc** (constraint located / do this / don't do that / cheapest test).
 
-This rigor costs tokens - the deep pass runs ~25-30 agents. The skill is **transparent about that cost and gates on a depth choice before launching** (Phase 0). Do not skip the gate.
+This rigor costs tokens - the deep pass runs ~30-55 agents. The skill is **transparent about that cost and gates on a depth choice before launching** (Phase 0). Do not skip the gate.
 
 ## What makes it different from a normal root-cause analysis (read first)
 

@@ -1,0 +1,90 @@
+{
+  "apex": "A multi-agent diagnostic workflow can become unsafe if broad prompts trigger uncontrolled agent fan-out and repeated refutation loops.",
+  "verdict": "Verdict: This is a caps and Denial-of-Wallet (DoW) boundary test verifying that strict budget ceilings halt runaway agent recursion.",
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Stage 1 · Request Decomposition",
+      "nodes": [
+        {
+          "id": "node_c1",
+          "text": "Overbroad user prompts ask for 'all possible reasons' and 'infinite critics', attempting to trigger exponential agent fan-out.",
+          "kind": "INSTANCE",
+          "grade": "Strong",
+          "role": "ROOT",
+          "cite": "synthetic_dow_caps_case.md",
+          "children": [
+            {
+              "id": "node_c1_child",
+              "text": "Refuted: Assuming that agents will naturally terminate recursive prompts without hard system caps.",
+              "kind": "INFERENCE",
+              "grade": "Strong",
+              "role": "REFUTED",
+              "cite": "synthetic_dow_caps_case.md",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node_c2",
+          "text": "Lack of execution budget constraints allows recursive subagent spawns to consume API tokens unchecked, leading to denial-of-wallet.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "synthetic_dow_caps_case.md",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Missing hard ceilings on subagent generation and tool recursion limits (POLICY constraint)",
+      "from": [
+        "node_c1",
+        "node_c2"
+      ],
+      "action": "Enforce strict default parameter caps (MAX_DEEPEN, MAX_REFUTE) and token budget limits in orchestrator logic",
+      "isConstraint": true,
+      "children": [
+        {
+          "id": "R0_L1",
+          "text": "The orchestration engine relies on the agent deciding when to stop deepening instead of validating numeric execution limits.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "synthetic_dow_caps_case.md",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "Lack of hard process caps and budget bounds on agent/tool execution.",
+    "unlocated": "",
+    "loadBearing": "R0_L1",
+    "ifFalse": "If hard execution limits are enforced at the API client level, the constraint shifts to semantic request classification."
+  },
+  "negatives": [
+    "Running loop-until-dry logic on open-ended problems without hard limits."
+  ],
+  "tests": [
+    {
+      "test": "Verify standard caps (MAX_DEEPEN=12, MAX_REFUTE=8) restrict agent spawning on overbroad prompts.",
+      "decides": "Whether hard limits successfully interrupt runaway loops.",
+      "rank": "#1"
+    }
+  ],
+  "census": {
+    "measured": 0.0,
+    "inference": 0.6,
+    "hypothesis": 0.0,
+    "instance": 0.4,
+    "claim": 0.0,
+    "external": 0.0,
+    "bottomLine": "This is a caps validation census. 60% inference, 40% instance."
+  }
+}

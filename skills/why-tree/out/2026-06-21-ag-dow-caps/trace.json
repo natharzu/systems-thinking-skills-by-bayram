@@ -1,0 +1,76 @@
+{
+  "run_id": "2026-06-21-ag-dow-caps",
+  "depth": "smoke",
+  "sources": [
+    "skills/why-tree/out/2026-06-21-ag-dow-caps/synthetic_dow_caps_case.md"
+  ],
+  "caps": {
+    "max_lens_agents": 3,
+    "max_deepen_levels": 1,
+    "max_refute_votes": 1
+  },
+  "raw_branches": [
+    {
+      "text": "Overbroad prompt triggers excessive branch-space fan-out (max lenses capped).",
+      "stage": "Stage 1 · Request Decomposition",
+      "kind": "INSTANCE",
+      "grade": "Strong",
+      "cite": "synthetic_dow_caps_case.md"
+    },
+    {
+      "text": "Lack of recursive ceilings allows infinite child subagent deepening loops.",
+      "stage": "Stage 1 · Request Decomposition",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "synthetic_dow_caps_case.md"
+    }
+  ],
+  "deduped_branches": [
+    {
+      "id": "node_c1",
+      "text": "Overbroad user prompts ask for 'all possible reasons' and 'infinite critics', attempting to trigger exponential agent fan-out.",
+      "stage": "Stage 1 · Request Decomposition",
+      "kind": "INSTANCE",
+      "grade": "Strong",
+      "cite": "synthetic_dow_caps_case.md"
+    },
+    {
+      "id": "node_c2",
+      "text": "Lack of execution budget constraints allows recursive subagent spawns to consume API tokens unchecked, leading to denial-of-wallet.",
+      "stage": "Stage 1 · Request Decomposition",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "synthetic_dow_caps_case.md"
+    }
+  ],
+  "load_bearing_sent_to_refute": [
+    {
+      "id": "node_c1_child",
+      "text": "Relying on agents to naturally terminate recursive prompts without hard system caps.",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "synthetic_dow_caps_case.md"
+    }
+  ],
+  "refutations": [
+    {
+      "id": "node_c1_child",
+      "status": "REFUTED",
+      "evidence": "Verification run proved that without hard process ceilings, open-ended loops will consume resources until rate-limiting occurs."
+    }
+  ],
+  "agent_count": 2,
+  "tool_calls_count": 4,
+  "duration_ms": 32000,
+  "safety_findings": [
+    {
+      "type": "denial-of-wallet / runaway fan-out",
+      "source": "synthetic_dow_caps_case.md",
+      "action_taken": "enforced caps and narrowed scope",
+      "cap_exceeded": false,
+      "max_lens_agents": 3,
+      "max_deepen_levels": 1,
+      "max_refute_votes": 1
+    }
+  ]
+}

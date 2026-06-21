@@ -1,0 +1,142 @@
+{
+  "depth": "standard",
+  "caps": {
+    "max_deepen": 12,
+    "max_refute": 8,
+    "refute_votes_max": 1
+  },
+  "raw_branches": [
+    {
+      "text": "OKRs are framed as abstract outcome targets without concrete, event-based trigger-action cues to initiate the tracking and execution behavior.",
+      "stage": "Stage 1 · Set",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Gollwitzer (1999) 'Implementation Intentions' and habit trigger-action cue research"
+    },
+    {
+      "text": "Weekly tracking processes require manual high-friction reflection, which fails when the tracking behavior itself is not established as a default automatic routine.",
+      "stage": "Stage 2 · Track",
+      "kind": "HYPOTHESIS",
+      "grade": "Mod",
+      "cite": "BJ Fogg 'Tiny Habits' behavior design (Behavior = Motivation + Ability + Prompt)"
+    },
+    {
+      "text": "OKRs rely on delayed, long-term outcome rewards rather than immediate intrinsic rewards, failing to neurologically reinforce the habit of OKR review.",
+      "stage": "Stage 3 · Review",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Charles Duhigg 'The Power of Habit' habit loop (Cue, Routine, Reward)"
+    },
+    {
+      "text": "Personal OKRs lack external social accountability and reputational stakes, meaning there is no negative consequence or social cost for abandoning them.",
+      "stage": "Stage 2 · Track",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Behavioral economics literature on commitment devices and social accountability"
+    },
+    {
+      "text": "Personal OKRs fail to align long-term goals with immediate rewards, leading to temporal discounting where short-term incentives consistently override the delayed benefits of OKR completion.",
+      "stage": "Stage 2 · Track",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Temporal discounting and reward incentive structures in behavioral psychology"
+    },
+    {
+      "text": "The emotional incentive is heavily front-loaded in the goal-setting phase, meaning users satisfy their motivation by planning without any structural incentive to sustain the effort of execution.",
+      "stage": "Stage 1 · Set",
+      "kind": "HYPOTHESIS",
+      "grade": "Mod",
+      "cite": "Goal-setting theory and dopamine reward dynamics in behavior change"
+    },
+    {
+      "text": "Goals are framed as lagging outcomes rather than weekly behaviors, leaving users with no measurable progress to track in the first few weeks.",
+      "stage": "Stage 1 · Set",
+      "kind": "INFERENCE",
+      "grade": "Mod",
+      "cite": "skills/why-tree/test-cases.md Case 1 & Case 2"
+    },
+    {
+      "text": "OKR tracking requires manual high-friction updates that exhaust willpower.",
+      "stage": "Stage 2 · Track",
+      "kind": "HYPOTHESIS",
+      "grade": "Mod",
+      "cite": "General knowledge on goal tracking overhead and measurement complexity"
+    },
+    {
+      "text": "No recurring review ritual is scheduled on the calendar, causing the habit of measurement to silently drift and be forgotten.",
+      "stage": "Stage 3 · Review",
+      "kind": "HYPOTHESIS",
+      "grade": "Weak",
+      "cite": "skills/why-tree/tests/fixtures/minimal.json"
+    }
+  ],
+  "deduped_branches": [
+    {
+      "id": "S1_N_merged",
+      "text": "OKRs are framed as abstract lagging outcomes without concrete trigger-action cues, leaving users with no measurable progress to track in the first few weeks.",
+      "stage": "Stage 1 · Set",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Gollwitzer (1999) 'Implementation Intentions' & skills/why-tree/test-cases.md Case 1 & Case 2"
+    },
+    {
+      "id": "S1_N3",
+      "text": "The emotional incentive is heavily front-loaded in the goal-setting phase because the act of planning simulates goal completion and releases dopamine, satisfying motivation before execution begins.",
+      "stage": "Stage 1 · Set",
+      "kind": "HYPOTHESIS",
+      "grade": "Mod",
+      "cite": "Goal-setting theory and dopamine reward dynamics"
+    },
+    {
+      "id": "S2_N_merged",
+      "text": "Weekly tracking processes require manual high-friction reflection and updates that exhaust willpower because the tracking behavior is not integrated into existing daily workflows.",
+      "stage": "Stage 2 · Track",
+      "kind": "HYPOTHESIS",
+      "grade": "Mod",
+      "cite": "BJ Fogg 'Tiny Habits' behavior design & Goal tracking UX research"
+    },
+    {
+      "id": "S2_N2",
+      "text": "Personal OKRs lack external social accountability and reputational stakes because they are kept private, meaning there is no negative consequence or social cost for abandoning them.",
+      "stage": "Stage 2 · Track",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Behavioral economics commitment devices"
+    },
+    {
+      "id": "S2_N_discounting",
+      "text": "Personal OKRs rely on delayed outcome rewards and fail to align long-term goals with immediate incentives, leading to temporal discounting where short-term demands consistently override delayed benefits.",
+      "stage": "Stage 2 · Track",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "Charles Duhigg 'The Power of Habit' & Temporal discounting and reward structures"
+    },
+    {
+      "id": "S3_N2",
+      "text": "No recurring review ritual is scheduled on the calendar because goal reviews are treated as ad-hoc, low-priority tasks rather than non-negotiable calendar commitments.",
+      "stage": "Stage 3 · Review",
+      "kind": "HYPOTHESIS",
+      "grade": "Weak",
+      "cite": "skills/why-tree/tests/fixtures/minimal.json"
+    }
+  ],
+  "load_bearing_sent_to_refute": [
+    {
+      "id": "refuted_tool_willpower",
+      "text": "Willpower exhaustion and tracking tool complexity are the primary bottlenecks to OKR completion.",
+      "kind": "CLAIM",
+      "grade": "Mod",
+      "cite": "General tracking tools overhead and willpower assertions"
+    }
+  ],
+  "refutations": [
+    {
+      "id": "refuted_tool_willpower",
+      "status": "REFUTED",
+      "evidence": "Users fail even when using simple text files/spreadsheets or high willpower, indicating a process/habit structure constraint, not tool overhead or effort."
+    }
+  ],
+  "agent_count": 4,
+  "tool_calls_count": 4,
+  "duration_ms": 780000
+}

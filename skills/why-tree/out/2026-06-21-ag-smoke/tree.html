@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Tree</title>
+<!--
+  WHY-TREE VISUALIZATION  ·  "The Diagnostician's Bench"  ·  v2 (spine + side rail)
+  Design from the Goldratt/Feynman/Tufte/Victor/Minto council (see ../council-viz-design.md):
+    - SPINE  : a stable top-down convergence funnel (apex -> stages -> roots -> ONE constraint).
+               Always visible = DECIDE + "you are here" minimap. Click a box to inspect it.
+    - RAIL   : a selection-driven reader on the right. Full statement + evidence + lineage; drill
+               into causes here = FOLLOW & VALIDATE. Prose lives in the rail, never in the boxes
+               (this kills the two-expand wart AND the width sprawl).
+    - The constraint's CONFIDENCE is shown (solid vs dashed) so a hypothesised constraint never
+      reads as a proven one. Refuted causes appear as ghost-stubs in the rail.
+  Data-driven: swap the JSON in <script id="tree-data">. Self-contained vanilla JS.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161b; --panel:#1b1e25; --panel-2:#232730; --raise:#2a2f3a;
+    --ink:#e7e9ec; --muted:#8b93a0; --faint:#5b626e; --line:#2e333d;
+    --target:#f5a524; --target-soft:rgba(245,165,36,.16);
+    --k-meas:#46d08a; --k-inst:#e08a4a; --k-ext:#5ba8f5; --k-claim:#f0697e;
+    --k-inf:#b98af0; --k-hyp:#e0c24a; --k-frame:#8b93a0;
+    --display:"Space Grotesk",ui-sans-serif,system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--display);font-size:15px;line-height:1.55;
+    padding:0 0 96px;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 480px at 78% -8%,rgba(245,165,36,.07),transparent 60%);}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  a{color:var(--k-ext);text-decoration:none} a:hover{text-decoration:underline}
+  code,.mono{font-family:var(--mono)}
+
+  header{padding:46px 0 30px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--target);margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--target);display:inline-block}
+  h1.apex{font-size:clamp(24px,4vw,40px);line-height:1.12;font-weight:700;letter-spacing:-.018em;margin:0;max-width:22ch}
+  .apex .frame{color:var(--faint);font-weight:500}
+  .verdict{font-size:clamp(15px,1.7vw,19px);line-height:1.45;color:var(--target);font-weight:500;margin:16px 0 0;max-width:64ch}
+  .provenance{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 20px}
+  .provenance b{color:var(--ink);font-weight:600}
+
+  .banner{background:linear-gradient(180deg,rgba(240,105,126,.10),rgba(240,105,126,.04));border:1px solid rgba(240,105,126,.32);border-left:3px solid var(--k-claim);border-radius:12px;padding:16px 20px;margin:26px 0}
+  .banner h3{margin:0 0 9px;font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#f3909f}
+  .banner ul{margin:0;padding-left:18px} .banner li{margin:6px 0;font-size:13.5px;color:#dfe2e6}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:26px 0 8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .legend .sep{width:1px;height:16px;background:var(--line);margin:0 4px}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.9}
+  .k-meas{color:var(--k-meas);background:rgba(70,208,138,.12)} .k-inst{color:var(--k-inst);background:rgba(224,138,74,.13)}
+  .k-ext{color:var(--k-ext);background:rgba(91,168,245,.12)} .k-claim{color:var(--k-claim);background:rgba(240,105,126,.12)}
+  .k-inf{color:var(--k-inf);background:rgba(185,138,240,.13)} .k-frame{color:var(--k-frame);background:rgba(139,147,160,.12)}
+  .k-hyp{color:var(--k-hyp);background:rgba(224,194,74,.10);border:1px dashed rgba(224,194,74,.55)}
+  .k-hyp::before{background:transparent;border:1px solid var(--k-hyp);width:6px;height:6px}
+  .grade{font-family:var(--mono);font-size:9.5px;color:var(--faint);font-weight:500}
+  .role{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;padding:1px 7px;border-radius:5px;text-transform:uppercase}
+  .role-root{color:#cdb3ff;background:rgba(130,80,223,.22);border:1px solid rgba(130,80,223,.4)}
+  .role-con{color:#141414;background:var(--target)}
+  .role-lever{color:#9ff0c2;background:rgba(70,208,138,.18);border:1px solid rgba(70,208,138,.34)}
+  .role-neg{color:#f6a6b2;background:rgba(110,34,51,.5);border:1px solid rgba(240,105,126,.4)}
+  .role-ref{color:var(--faint);background:transparent;border:1px solid var(--line)}
+  .role-down{color:var(--k-hyp);background:transparent;border:1px solid rgba(224,194,74,.5)}
+  .role-new{color:#bcdcff;background:rgba(91,168,245,.16);border:1px solid rgba(91,168,245,.34)}
+
+  h2.sec{font-size:13px;font-family:var(--mono);font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:50px 0 4px;display:flex;align-items:center;gap:12px}
+  h2.sec .n{color:var(--target);font-size:12px}
+  h2.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sec-sub{color:var(--faint);font-size:13px;margin:2px 0 16px;font-family:var(--display)}
+
+  /* ===================== WORKBENCH: spine + rail ===================== */
+  .workbench{display:grid;grid-template-columns:1fr 372px;gap:20px;align-items:start;margin-top:10px}
+
+  .spine{position:relative;border:1px solid var(--line);border-radius:16px;
+    background:radial-gradient(620px 360px at 50% 118%,var(--target-soft),transparent 60%),var(--panel);
+    padding:22px 18px 28px;overflow:hidden}
+  .spine.focusing .knode{opacity:.34;filter:saturate(.6)} .spine.focusing .knode.on{opacity:1;filter:none}
+  .band{position:relative;display:flex;flex-wrap:wrap;justify-content:center;gap:9px 11px;z-index:2}
+  .band + .band{margin-top:44px}
+  .band-label{position:absolute;left:0;top:-17px;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .knode{position:relative;cursor:pointer;background:var(--panel-2);border:1px solid var(--raise);border-left:4px solid var(--faint);border-radius:10px;padding:9px 12px;max-width:230px;min-width:118px;transition:opacity .2s,filter .2s,border-color .15s,transform .1s,box-shadow .15s}
+  .knode:hover{transform:translateY(-1px);border-color:var(--muted)}
+  .knode:focus-visible{outline:2px solid var(--target);outline-offset:2px}
+  .knode.sel{box-shadow:0 0 0 2px var(--target),0 8px 24px -10px rgba(245,165,36,.5)}
+  .knode .kl{font-size:12.5px;line-height:1.3;font-weight:500;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .knode .km{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .knode .kdot{width:7px;height:7px;border-radius:50%;flex:none}
+  .knode .kcount{font-family:var(--mono);font-size:9px;color:var(--faint);margin-left:auto}
+  .knode.apex{border-left-color:var(--k-frame);background:#0f1217;max-width:none;flex:1 1 100%;text-align:center}
+  .knode.apex .kl{-webkit-line-clamp:2;font-weight:600;font-size:14px}
+  .knode.stage{border-left-color:var(--k-ext)}
+  .knode.root{border-left-color:var(--k-inf)}
+  .knode.weak{border-left-style:dashed} /* support rests on soft evidence */
+  .knode.constraint{border:1.5px solid var(--target);border-left:4px solid var(--target);background:linear-gradient(160deg,rgba(245,165,36,.22),rgba(245,165,36,.05));box-shadow:0 0 0 1px rgba(245,165,36,.15),0 14px 46px -16px rgba(245,165,36,.5);max-width:540px}
+  .knode.constraint.weak{border-style:dashed}
+  .knode.constraint .kl{font-weight:700;font-size:14px;-webkit-line-clamp:3}
+  .knode.constraint .lock{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--target);margin-bottom:4px}
+  .knode.constraint .lock::before{content:"◎ "}
+  .knode .conf{font-family:var(--mono);font-size:9.5px;color:var(--faint);margin-top:6px}
+  /* constraint chain to bedrock — the multi-level drill, rendered IN the spine (not the rail) */
+  .chain-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:30px 0 2px;text-align:center;z-index:2;position:relative}
+  .chain{display:flex;flex-direction:column;align-items:center;z-index:2;position:relative}
+  .cwhy{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:8px 0 7px;position:relative}
+  .cwhy::before{content:"";position:absolute;left:50%;top:-9px;width:1.5px;height:9px;background:var(--target);opacity:.5;transform:translateX(-50%)}
+  .knode.clevel{max-width:470px;border-left:4px solid var(--k-inf);background:var(--panel-2)}
+  .knode.clevel .kl{-webkit-line-clamp:3;font-size:12px;font-weight:500}
+  .knode.clevel.bedrock{border-left-color:var(--target);background:linear-gradient(160deg,rgba(245,165,36,.13),transparent)}
+  /* #9 weakest-link flag + #10 stress-test (poke the load-bearing node, watch the verdict move) */
+  .knode.lb{border-left-color:var(--k-hyp);border-left-style:dashed}
+  .lbtag{display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;color:var(--k-hyp);border:1px dashed rgba(224,194,74,.55);border-radius:5px;padding:0 6px;margin-left:auto;text-transform:uppercase}
+  .knode.lb.struck{opacity:.4;border-left-color:var(--k-claim)} .knode.lb.struck .kl{text-decoration:line-through;text-decoration-color:var(--k-claim)}
+  .knode.constraint.mapped{border-style:dashed;filter:saturate(.7)}
+  .stress-btn{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--target);background:var(--target-soft);border:1px dashed rgba(245,165,36,.5);border-radius:9px;padding:9px 12px;margin-top:14px}
+  .stress-btn:hover{background:rgba(245,165,36,.16)}
+  .stress-out{font-size:13px;line-height:1.5;color:#e9d8b8;background:rgba(240,105,126,.08);border:1px solid rgba(240,105,126,.3);border-left:3px solid var(--k-claim);border-radius:0 9px 9px 0;padding:11px 13px;margin-top:10px}
+  .stress-out b{color:#f3909f}
+  svg.edges{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
+  svg.edges path{fill:none;stroke:var(--line);stroke-width:1.3;transition:stroke .2s,stroke-width .2s,opacity .2s}
+  .spine.focusing svg.edges path{opacity:.16} svg.edges path.on{stroke:var(--target);stroke-width:1.9;opacity:1}
+
+  /* ---- the rail (follow & validate) ---- */
+  .rail{position:sticky;top:14px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;min-height:340px}
+  .rail .crumb{font-family:var(--mono);font-size:10.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+  .rail .crumb a{cursor:pointer;color:var(--muted)} .rail .crumb a:hover{color:var(--ink);text-decoration:none}
+  .rail .crumb .sepc{color:var(--faint)}
+  .rail .rtype{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--target);margin-bottom:6px}
+  .rail .rtitle{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0 0 10px}
+  .rail .rchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .rail .rstmt{font-size:13.5px;line-height:1.5;color:#dfe2e6;margin:0 0 12px}
+  .rail .rcite{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.02);border-left:2px solid var(--raise);border-radius:0 7px 7px 0;padding:8px 11px;margin:0 0 14px}
+  .rail .rcite .cl{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+  .rail .rlineage{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 14px;line-height:1.6}
+  .rail .rlineage b{color:var(--target);font-weight:600}
+  .rail h5{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:14px 0 8px}
+  .rail .child{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin:6px 0;cursor:pointer;transition:.12s;background:var(--panel-2)}
+  .rail .child:hover{border-color:var(--target);background:var(--raise)}
+  .rail .child .cdot{width:7px;height:7px;border-radius:50%;flex:none;margin-top:4px}
+  .rail .child .ctext{font-size:12.5px;line-height:1.35;flex:1}
+  .rail .child.ghost{opacity:.5} .rail .child.ghost .ctext{text-decoration:line-through;text-decoration-color:var(--line);color:var(--faint)}
+  .rail .rempty{color:var(--faint);font-size:13px;line-height:1.5}
+  .rail .raction{font-size:13px;color:#e9d8b8;background:var(--target-soft);border:1px solid rgba(245,165,36,.3);border-radius:9px;padding:10px 12px;margin-top:6px}
+  .rail .raction b{color:var(--target)}
+
+  /* panels / census */
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .panel h4{margin:0 0 12px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .neg li{margin:9px 0;font-size:13.5px;color:#dfe2e6;list-style:none;padding-left:24px;position:relative}
+  .neg li::before{content:"✕";position:absolute;left:0;color:var(--k-claim);font-family:var(--mono);font-weight:700}
+  .test{margin:0 0 14px;padding-bottom:14px;border-bottom:1px solid var(--line)} .test:last-child{border:none;margin:0;padding:0}
+  .test .t{font-size:13.5px;font-weight:600;color:var(--ink)} .test .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .test .rank{font-family:var(--mono);font-size:10px;color:var(--target);float:right;border:1px solid rgba(245,165,36,.4);border-radius:5px;padding:1px 7px;margin-left:8px}
+  .census-bar{display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 12px;border:1px solid var(--line)}
+  .census-bar span{display:block;height:100%}
+  .census-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .census-key i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+  .census .bottom{font-size:13.5px;color:#dfe2e6;margin-top:14px;line-height:1.5;border-left:2px solid var(--target);padding-left:12px}
+  .foot{color:var(--faint);font-family:var(--mono);font-size:11.5px;margin-top:46px;padding-top:18px;border-top:1px solid var(--line)}
+
+  @media (max-width:900px){
+    .workbench{grid-template-columns:1fr} .rail{position:static}
+    .panels{grid-template-columns:1fr}
+    svg.edges{display:none} .band{flex-direction:column;align-items:stretch} .band+.band{margin-top:20px}
+    .knode,.knode.constraint{max-width:none}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .knode.constraint{animation:lock 2.4s ease-out 1}
+    @keyframes lock{0%{box-shadow:0 0 0 1px rgba(245,165,36,.15),0 0 0 0 rgba(245,165,36,0)}40%{box-shadow:0 0 0 1px rgba(245,165,36,.4),0 0 60px -8px rgba(245,165,36,.7)}100%{box-shadow:0 0 0 1px rgba(245,165,36,.15),0 14px 46px -16px rgba(245,165,36,.5)}}
+  }
+</style>
+</head>
+<body>
+
+<!-- ====================== TREE DATA (swap this block per run) ====================== -->
+<script id="tree-data" type="application/json">
+{
+  "apex": "Most personal OKRs get abandoned by week 3.",
+  "verdict": "Personal OKRs fail by week 3 because they are framed as abstract lagging outcomes without establishing event-based tracking habits and calendar review rituals.",
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Stage 1 · Set",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S1_N_merged",
+          "text": "OKRs are framed as abstract lagging outcomes without concrete trigger-action cues, leaving users with no measurable progress to track in the first few weeks.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Gollwitzer (1999) 'Implementation Intentions' & skills/why-tree/test-cases.md Case 1 & Case 2",
+          "children": []
+        },
+        {
+          "id": "S1_N3",
+          "text": "The emotional incentive is heavily front-loaded in the goal-setting phase because the act of planning simulates goal completion and releases dopamine, satisfying motivation before execution begins.",
+          "kind": "HYPOTHESIS",
+          "grade": "Mod",
+          "role": "",
+          "cite": "Goal-setting theory and dopamine reward dynamics",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Stage 2 · Track",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S2_N_merged",
+          "text": "Weekly tracking processes require manual high-friction reflection and updates that exhaust willpower because the tracking behavior is not integrated into existing daily workflows.",
+          "kind": "HYPOTHESIS",
+          "grade": "Mod",
+          "role": "",
+          "cite": "BJ Fogg 'Tiny Habits' behavior design & Goal tracking UX research",
+          "children": []
+        },
+        {
+          "id": "S2_N2",
+          "text": "Personal OKRs lack external social accountability and reputational stakes because they are kept private, meaning there is no negative consequence or social cost for abandoning them.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "",
+          "cite": "Behavioral economics commitment devices",
+          "children": []
+        },
+        {
+          "id": "S2_N_discounting",
+          "text": "Personal OKRs rely on delayed outcome rewards and fail to align long-term goals with immediate incentives, leading to temporal discounting where short-term demands consistently override delayed benefits.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Charles Duhigg 'The Power of Habit' & Temporal discounting and reward structures",
+          "children": []
+        },
+        {
+          "id": "refuted_tool_willpower",
+          "text": "Willpower exhaustion and tracking tool complexity are the primary bottlenecks to OKR completion.",
+          "kind": "CLAIM",
+          "grade": "Mod",
+          "role": "REFUTED",
+          "cite": "Refutation evidence: users fail even when using simple text files/spreadsheets or high willpower, indicating a process/habit structure constraint, not tool overhead or effort.",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Stage 3 · Review",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S3_N2",
+          "text": "No recurring review ritual is scheduled on the calendar because goal reviews are treated as ad-hoc, low-priority tasks rather than non-negotiable calendar commitments.",
+          "kind": "HYPOTHESIS",
+          "grade": "Weak",
+          "role": "",
+          "cite": "skills/why-tree/tests/fixtures/minimal.json",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Personal OKR design relies on a policy of framing goals as abstract lagging outcomes without establishing habit cues or scheduled review rituals.",
+      "from": [
+        "S1_N_merged",
+        "S2_N_merged",
+        "S3_N2"
+      ],
+      "action": "Define goals as weekly behavioral lead metrics with explicit trigger-action plans and calendar-blocked review rituals.",
+      "isConstraint": true,
+      "children": [
+        {
+          "id": "R0_L1",
+          "text": "Goals are framed as abstract lagging outcomes without concrete trigger-action cues because the goal-setting process focuses on defining long-term aspirations rather than designing weekly behavioral habits.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Gollwitzer (1999) 'Implementation Intentions'",
+          "children": [
+            {
+              "id": "R0_L2",
+              "text": "The goal-setting process focuses on aspirations rather than habits because users mistake the emotional satisfaction of planning for actual progress.",
+              "kind": "HYPOTHESIS",
+              "grade": "Mod",
+              "role": "",
+              "cite": "Goal-setting theory and dopamine reward dynamics",
+              "children": [
+                {
+                  "id": "R0_L3",
+                  "text": "Users mistake planning satisfaction for progress because the human brain naturally releases dopamine upon formulating a goal, reducing the immediate cognitive tension and urgency needed to build execution habits.",
+                  "kind": "EXTERNAL",
+                  "grade": "Strong",
+                  "role": "",
+                  "cite": "Neurobiology of anticipation and reward projection",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R1",
+      "title": "Personal OKRs lack external social accountability and reputational consequences, making abandonment cost-free.",
+      "from": [
+        "S2_N2"
+      ],
+      "action": "Implement commitment devices (e.g., social contracts or public stakes) to introduce social costs for abandonment.",
+      "isConstraint": false,
+      "children": []
+    },
+    {
+      "id": "R2",
+      "title": "Personal OKRs create a dopamine asymmetry where motivation is front-loaded in goal setting while tracking relies on delayed long-term rewards.",
+      "from": [
+        "S1_N3",
+        "S2_N_discounting"
+      ],
+      "action": "Design immediate intrinsic rewards or gamified micro-incentives into the weekly tracking ritual.",
+      "isConstraint": false,
+      "children": []
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "The primary system constraint is the policy of framing OKRs as abstract lagging outcomes without establishing event-based habit cues or calendar-blocked review rituals.",
+    "unlocated": "No unlocated constraint; the policy constraint is located and requires process/behavior changes.",
+    "loadBearing": "R0_L2",
+    "ifFalse": "If users do not mistake planning satisfaction for progress, the constraint shifts to Root R2 (dopamine asymmetry and lack of immediate incentives)."
+  },
+  "negatives": [
+    "Forcing users to use complex OKR tracking software with rigid daily update reminders, which increases cognitive friction and accelerates abandonment due to tool fatigue.",
+    "Adding public shaming or severe negative consequences for missing personal goals, which causes users to set extremely low, unchallenging OKRs to guarantee safety."
+  ],
+  "tests": [
+    {
+      "test": "Implement a 2-week trial where users set OKRs but are randomly assigned to either define event-based habit cues (implementation intentions) or standard outcome goals.",
+      "decides": "Adjudicates whether explicit trigger-action cues significantly reduce week-3 abandonment rates compared to standard outcome framing (adjudicates R0_L1).",
+      "rank": "#1"
+    },
+    {
+      "test": "Survey users post-goal-setting to measure self-reported motivation levels, then track their weekly login/update frequency.",
+      "decides": "Adjudicates whether front-loaded dopamine/emotional satisfaction in planning correlates with earlier abandonment (adjudicates R0_L2).",
+      "rank": "#2"
+    }
+  ],
+  "census": {
+    "measured": 0.0,
+    "inference": 0.4,
+    "hypothesis": 0.4,
+    "instance": 0.0,
+    "claim": 0.1,
+    "external": 0.1,
+    "bottomLine": "The analysis contains 40% INFERENCE and 40% HYPOTHESIS, with no direct MEASURED data on this specific cohort. The system constraint is located, but its load-bearing support (R0_L2) remains a HYPOTHESIS. Thus, this is a map of where to test, rather than a final settled verdict."
+  }
+}
+</script>
+<!-- ====================== /TREE DATA ====================== -->
+
+<header><div class="wrap">
+  <p class="eyebrow">Why Tree · Current-Reality diagnosis</p>
+  <h1 class="apex" id="apex"></h1>
+  <p class="verdict" id="verdict"></p>
+  <div class="provenance" id="provenance"></div>
+</div></header>
+
+<div class="wrap">
+  <div id="banner"></div>
+  <div class="legend" id="legend"></div>
+
+  <h2 class="sec"><span class="n">01</span> The tree — decide on the left, validate on the right</h2>
+  <p class="sec-sub">Reads top-down as one "why" chain: <b>the problem</b>, because <b>these root causes</b>, narrowing to <b>the one binding constraint</b>. Click any box to inspect it in the rail and trace its path; drill into the evidence to follow & validate.</p>
+  <div class="workbench">
+    <div class="spine" id="spine"><svg class="edges" id="edges"></svg></div>
+    <aside class="rail" id="rail"></aside>
+  </div>
+
+  <h2 class="sec"><span class="n">02</span> Don't do this · cheapest test</h2>
+  <div class="panels">
+    <div class="panel"><h4>Negative branches — fixes that backfire</h4><ul class="neg" id="negatives"></ul></div>
+    <div class="panel"><h4>Cheapest fork-deciding tests</h4><div id="tests"></div></div>
+  </div>
+
+  <h2 class="sec"><span class="n">03</span> How grounded is this?</h2>
+  <div class="panel census" id="census"></div>
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+const KIND={MEASURED:{c:"k-meas",col:"var(--k-meas)",soft:0},INSTANCE:{c:"k-inst",col:"var(--k-inst)",soft:2},EXTERNAL:{c:"k-ext",col:"var(--k-ext)",soft:3},INFERENCE:{c:"k-inf",col:"var(--k-inf)",soft:4},CLAIM:{c:"k-claim",col:"var(--k-claim)",soft:5},HYPOTHESIS:{c:"k-hyp",col:"var(--k-hyp)",soft:6},FRAMING:{c:"k-frame",col:"var(--k-frame)",soft:1}};
+const ROLE={ROOT:"role-root",CONSTRAINT:"role-con","CONSTRAINT?":"role-con",LEVER:"role-lever",NEGATIVE:"role-neg",REFUTED:"role-ref",DOWNGRADED:"role-down","critic-added":"role-new"};
+const esc=s=>(s==null?"":String(s)).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+const D=JSON.parse(document.getElementById('tree-data').textContent);
+function short(s,n){s=(s||'').replace(/^\s*Stage\s*\d+\s*[·:.\-]\s*/i,'').trim();let c=s.split(/—|–| - |[;:(]/)[0].trim()||s;if(c.length>n)c=c.slice(0,n-1).trim()+'…';return c;}
+function firstClause(s){return (s||'').split(/ - | — |\. /)[0].trim();}
+/* The funnel top must be the undesirable effect as a STATEMENT, not a question.
+   Prefer an explicit `problem`; else if apex is phrased as a question, use the verdict's first clause. */
+const problemStatement = D.problem || (/\?\s*$/.test(D.apex||'') ? (firstClause(D.verdict||'')||D.apex) : D.apex) || '';
+function kchip(k){return k?`<span class="chip ${(KIND[k]||{}).c||'k-frame'}">${esc(k)}</span>`:'';}
+function dot(k){return `<span class="kdot" style="background:${(KIND[k]||{}).col||'var(--faint)'}"></span>`;}
+function rdot(k){return `<span class="cdot" style="background:${(KIND[k]||{}).col||'var(--faint)'}"></span>`;}
+
+/* header / banner / legend */
+document.getElementById('apex').innerHTML=esc(problemStatement)+' <span class="frame">— the problem</span>';
+const vEl=document.getElementById('verdict'); if(D.verdict)vEl.textContent=D.verdict; else vEl.style.display='none';
+const p=D.provenance||{};
+document.getElementById('provenance').innerHTML=[["Method",p.method],["Depth",p.depth],["Agents",p.agents],["Built",p.date]].filter(x=>x[1]!=null).map(x=>`${esc(x[0])} <b>${esc(x[1])}</b>`).join('<span></span>');
+if(D.corrections&&D.corrections.length)document.getElementById('banner').innerHTML=`<div class="banner"><h3>⚠ Read first — live corrections from the data</h3><ul>${D.corrections.map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>`;
+document.getElementById('legend').innerHTML='<span>EVIDENCE</span>'+Object.keys(KIND).map(k=>`<span class="chip ${KIND[k].c}">${k}</span>`).join('')+'<span class="sep"></span><span>ROLE</span>'+['ROOT','CONSTRAINT','LEVER','REFUTED'].map(r=>`<span class="role ${ROLE[r]}">${r}</span>`).join('')+'<span class="grade">· grade Strong/Mod/Weak · dashed = rests on soft evidence</span>';
+
+/* indexes */
+const stages=D.stages||[], roots=D.roots||[], con=D.constraint||{};
+const nodeById={}, nodeStage={}, topNodesOfStage={}; let _cid=0;
+function indexNode(n,stageId){ if(!n.id)n.id='c'+(++_cid); nodeById[n.id]=n; if(stageId)nodeStage[n.id]=stageId; (n.children||[]).forEach(c=>indexNode(c,stageId)); }
+stages.forEach(s=>{ topNodesOfStage[s.id]=(s.nodes||[]).map(n=>n.id); (s.nodes||[]).forEach(n=>indexNode(n,s.id)); });
+roots.forEach(r=>(r.children||[]).forEach(c=>indexNode(c,null)));   /* index the constraint-branch chain too */
+const conRoot=roots.find(r=>r.isConstraint)||roots.find(r=>r.id===con.rootId)||roots[roots.length-1];
+const otherRoots=roots.filter(r=>r!==conRoot);
+/* #10/#9 — the single node the constraint most rests on (its weakest-evidence support), for the stress-test */
+const conChain=[]; (function cc(ns){(ns||[]).forEach(n=>{conChain.push(n);cc(n.children);});})(conRoot.children);
+function softRank(n){return (KIND[(n||{}).kind]||{}).soft||0;}
+const gradeOrd={Weak:0,Mod:1,Strong:2};
+const lbPool=(conRoot.from||[]).map(id=>nodeById[id]).filter(Boolean).concat(conChain);
+const loadBearing=(con.loadBearing&&nodeById[con.loadBearing]) ||
+  lbPool.slice().sort((a,b)=> softRank(b)-softRank(a) || ((gradeOrd[a.grade]??1)-(gradeOrd[b.grade]??1)))[0] || null;
+const lbFragile=!!loadBearing && (softRank(loadBearing)>=4 || loadBearing.grade!=='Strong');
+let stressed=false;
+function applyStress(){const cc=spine.querySelector('.knode.constraint');if(cc)cc.classList.toggle('mapped',stressed);
+  if(loadBearing){const ln=spine.querySelector(`.knode[data-sk="nd:${CSS.escape(loadBearing.id)}"]`);if(ln)ln.classList.toggle('struck',stressed);}}
+const rootsByNode={}; roots.forEach(r=>(r.from||[]).forEach(nid=>{(rootsByNode[nid]=rootsByNode[nid]||[]).push(r.id);}));
+function weakestKind(ids){let w=null,ws=-1; (ids||[]).forEach(id=>{const k=(nodeById[id]||{}).kind; const s=(KIND[k]||{}).soft||0; if(s>ws){ws=s;w=k;}}); return w;}
+function isWeak(k){return (KIND[k]||{}).soft>=5;} /* CLAIM/HYPOTHESIS */
+
+/* ===== SPINE ===== */
+const spine=document.getElementById('spine');
+function card(cls,sk,inner,extra){return `<div class="knode ${cls} ${extra||''}" data-sk="${esc(sk)}" tabindex="0">${inner}</div>`;}
+const apexCard=card('apex','APEX',`<div class="kl">${esc(problemStatement)}</div>`);
+const rootBand=otherRoots.map(r=>{const wk=weakestKind(r.from);
+  return card('root','rt:'+r.id,`<div class="kl">${esc(r.shortLabel||short(r.title,70))}</div><div class="km">${dot(wk)}<span class="kcount">${(r.from||[]).length} cause${(r.from||[]).length!==1?'s':''}</span></div>`, isWeak(wk)?'weak':'');}).join('');
+const conWk=weakestKind(conRoot.from);
+const conCard=card('constraint','rt:'+conRoot.id,`<div class="lock">System constraint · ${esc(con.type||'located')}</div><div class="kl">${esc(conRoot.title||'The constraint')}</div><div class="conf">${conSupport()}</div>`, isWeak(conWk)?'weak':'');
+/* the constraint-branch chain to bedrock — rendered as visible levels IN the spine (fixes the "1-level-deep" look) */
+function chainCards(nodes){ if(!nodes||!nodes.length)return '';
+  return nodes.map(n=>{const bedrock=!(n.children&&n.children.length);const lb=!!loadBearing&&n.id===loadBearing.id;
+    return `<div class="cwhy">because</div>`+
+      `<div class="knode clevel${bedrock?' bedrock':''}${lb?' lb':''}" data-sk="nd:${esc(n.id)}" tabindex="0">`+
+        `<div class="kl">${esc(short(n.text,130))}</div>`+
+        `<div class="km">${dot(n.kind)}<span class="grade">${esc(n.kind||'')}${n.grade?' · '+esc(n.grade):''}</span>`+
+        `${n.role?`<span class="role ${ROLE[n.role]||''}">${esc(n.role)}</span>`:''}${bedrock&&!lb?'<span class="kcount">bedrock</span>':''}${lb?'<span class="lbtag">weakest link</span>':''}</div>`+
+      `</div>`+chainCards(n.children);}).join(''); }
+const chainHtml=(conRoot.children&&conRoot.children.length)
+  ? `<div class="chain-label">↓ why it exists — the chain to bedrock</div><div class="chain">${chainCards(conRoot.children)}</div>` : '';
+spine.insertAdjacentHTML('beforeend',
+  `<div class="band"><span class="band-label">The problem · undesirable effect</span>${apexCard}</div>`+
+  (otherRoots.length?`<div class="band"><span class="band-label">Because — root causes</span>${rootBand}</div>`:'')+
+  `<div class="band"><span class="band-label">The binding constraint</span>${conCard}</div>`+
+  chainHtml);
+
+function conSupport(){const ids=conRoot.from||[];const tally={};ids.forEach(id=>{const k=(nodeById[id]||{}).kind||'?';tally[k]=(tally[k]||0)+1;});
+  const parts=Object.keys(tally).map(k=>`${tally[k]} ${k.toLowerCase()}`).join(' · ');
+  return (isWeak(conWk)?'⚠ rests on soft evidence — ':'rests on — ')+esc(parts||'—');}
+
+/* edges */
+const E=[]; roots.forEach(r=>E.push({f:'APEX',t:'rt:'+r.id}));
+otherRoots.forEach(r=>E.push({f:'rt:'+r.id,t:'rt:'+conRoot.id}));
+const svg=document.getElementById('edges');
+function rc(sk){const el=spine.querySelector(`.knode[data-sk="${CSS.escape(sk)}"]`);if(!el)return null;const b=spine.getBoundingClientRect(),r=el.getBoundingClientRect();return {cx:(r.left+r.right)/2-b.left,top:r.top-b.top,bot:r.bottom-b.top};}
+function drawEdges(){let p='';E.forEach((e,i)=>{const a=rc(e.f),c=rc(e.t);if(!a||!c)return;const x1=a.cx,y1=a.bot,x2=c.cx,y2=c.top,my=(y1+y2)/2;p+=`<path data-i="${i}" d="M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}"/>`;});svg.innerHTML=p;}
+drawEdges();window.addEventListener('resize',drawEdges);setTimeout(drawEdges,400);
+
+/* light the path for a set of spine sk-ids (down to constraint) */
+function lightSpine(seedSks){
+  const set=new Set(seedSks);
+  // walk downward to constraint
+  let fr=[...seedSks]; while(fr.length){const nx=[];E.forEach(e=>{if(set.has(e.f)&&!set.has(e.t)){set.add(e.t);nx.push(e.t);}});fr=nx;}
+  spine.classList.add('focusing');
+  spine.querySelectorAll('.knode').forEach(n=>n.classList.toggle('on',set.has(n.dataset.sk)));
+  svg.querySelectorAll('path').forEach(pa=>{const e=E[+pa.dataset.i];pa.classList.toggle('on',e&&set.has(e.f)&&set.has(e.t));});
+}
+function clearLight(){spine.classList.remove('focusing');spine.querySelectorAll('.knode').forEach(n=>n.classList.remove('on'));svg.querySelectorAll('path').forEach(p=>p.classList.remove('on'));}
+function markSel(sk){spine.querySelectorAll('.knode').forEach(n=>n.classList.toggle('sel',n.dataset.sk===sk));}
+
+/* ===== RAIL (follow & validate) ===== */
+const rail=document.getElementById('rail');
+function crumb(items){return `<div class="crumb">${items.map((it,i)=>(i?'<span class="sepc">›</span>':'')+(it.go?`<a data-go='${esc(JSON.stringify(it.go))}'>${esc(it.label)}</a>`:`<span>${esc(it.label)}</span>`)).join('')}</div>`;}
+function childRow(n){const g=n.role==='REFUTED'?'ghost':'';const st=(stages.find(s=>s.id===nodeStage[n.id])||{}).title;return `<div class="child ${g}" data-node="${esc(n.id)}">${rdot(n.kind)}<div class="ctext">${esc(short(n.text,120))} ${n.role?`<span class="role ${ROLE[n.role]||''}">${esc(n.role)}</span>`:''}${st?` <span class="grade">· ${esc(short(st,18))}</span>`:''}</div></div>`;}
+
+function inspectApex(){clearLight();markSel('APEX');spine.classList.add('focusing');spine.querySelectorAll('.knode').forEach(n=>n.classList.add('on'));svg.querySelectorAll('path').forEach(p=>p.classList.add('on'));
+  rail.innerHTML=crumb([{label:'The problem'}])+`<div class="rtype">Problem · undesirable effect</div><div class="rtitle">${esc(problemStatement)}</div>`+(D.verdict?`<div class="rstmt">${esc(D.verdict)}</div>`:'')+`<h5>Because — root causes</h5>`+roots.map(r=>`<div class="child" data-root="${esc(r.id)}">${rdot(weakestKind(r.from))}<div class="ctext">${esc(r.title)} ${r.isConstraint?'<span class="role role-con">CONSTRAINT</span>':''}</div></div>`).join('');}
+
+function lineage(nid){const rs=(rootsByNode[nid]||[]).map(rid=>(roots.find(r=>r.id===rid)||{}).title).filter(Boolean);
+  return `feeds <b>${rs.map(esc).join('</b>, <b>')||'—'}</b> → <b>${esc(conRoot.title)}</b>`;}
+function inspectNode(nid){const n=nodeById[nid];if(!n)return;const rid=(rootsByNode[nid]||[])[0];const r=roots.find(x=>x.id===rid);const st=(stages.find(s=>s.id===nodeStage[nid])||{}).title;
+  markSel(rid?'rt:'+rid:'APEX');lightSpine(rid?['rt:'+rid]:['APEX']);
+  const kids=n.children||[];
+  rail.innerHTML=crumb([{label:'Problem',go:{t:'apex'}}].concat(r?[{label:short(r.title,20),go:{t:'root',id:rid}}]:[]).concat([{label:short(n.text,22)}]))
+    +`<div class="rtype">${n.role==='REFUTED'?'Refuted cause (kept as evidence)':'Cause'}${st?` · ${esc(short(st,22))}`:''}</div>`
+    +`<div class="rtitle">${esc(n.text)}</div>`
+    +`<div class="rchips">${kchip(n.kind)}${n.grade?`<span class="grade">${esc(n.grade)}</span>`:''}${n.role?`<span class="role ${ROLE[n.role]||''}">${esc(n.role)}</span>`:''}</div>`
+    +(n.cite?`<div class="rcite"><span class="cl">evidence</span>${esc(n.cite)}</div>`:'')
+    +`<div class="rlineage">${lineage(nid)}</div>`
+    +(kids.length?`<h5>Because of (sub-causes)</h5>`+kids.map(childRow).join(''):'');}
+
+function inspectRoot(rid){const r=roots.find(x=>x.id===rid);if(!r)return;
+  if(r.isConstraint)return inspectConstraint();
+  markSel('rt:'+rid);lightSpine(['rt:'+rid]);
+  rail.innerHTML=crumb([{label:'Problem',go:{t:'apex'}},{label:'Root: '+short(r.title,20)}])+`<div class="rtype">Root cause</div><div class="rtitle">${esc(r.title)}</div>`
+    +(r.action?`<div class="raction"><b>→</b> ${esc(r.action)}</div>`:'')
+    +`<h5>Converges from</h5>`+(r.from||[]).map(id=>nodeById[id]?childRow(nodeById[id]):'').join('');}
+
+function inspectConstraint(){markSel('rt:'+conRoot.id);lightSpine(otherRoots.map(r=>'rt:'+r.id).concat(['rt:'+conRoot.id]));
+  rail.innerHTML=crumb([{label:'Problem',go:{t:'apex'}},{label:'The constraint'}])+`<div class="rtype">System constraint · ${esc(con.type||'located')}</div><div class="rtitle">${esc(conRoot.title)}</div>`
+    +(conRoot.action?`<div class="raction"><b>→ do this:</b> ${esc(conRoot.action)}</div>`:'')
+    +(con.statement?`<div class="rstmt" style="margin-top:12px">${esc(con.statement)}</div>`:'')
+    +`<div class="rcite"><span class="cl">confidence</span>${conSupport()}</div>`
+    +(con.unlocated?`<div class="rstmt" style="color:var(--muted)">${esc(con.unlocated)}</div>`:'')
+    +`<h5>Converges from</h5>`+(conRoot.from||[]).map(id=>nodeById[id]?childRow(nodeById[id]):'').join('')
+    +(lbFragile?`<div class="stress-btn" id="stresstest">⚡ ${stressed?'Reset the stress-test':'Stress-test — what if the weakest evidence is wrong?'}</div>`
+      +(stressed?`<div class="stress-out"><b>Then the verdict moves.</b> The whole constraint rests on one node — “${esc(short(loadBearing.text,64))}” (${esc(loadBearing.kind)}/${esc(loadBearing.grade)}). ${esc(con.ifFalse||'If it falls, this is a MAP, not a verdict — run test #1 to re-settle.')}</div>`:''):'');}
+
+/* events */
+spine.addEventListener('click',e=>{const c=e.target.closest('.knode');if(!c)return;const sk=c.dataset.sk;
+  if(sk==='APEX')inspectApex(); else if(sk.startsWith('nd:'))inspectNode(sk.slice(3)); else if(sk.startsWith('rt:'))inspectRoot(sk.slice(3));});
+spine.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('knode')){e.preventDefault();e.target.click();}});
+rail.addEventListener('click',e=>{
+  const st=e.target.closest('#stresstest'); if(st){stressed=!stressed;applyStress();inspectConstraint();return;}
+  const go=e.target.closest('[data-go]'); if(go){const g=JSON.parse(go.dataset.go);if(g.t==='apex')inspectApex();else if(g.t==='root')inspectRoot(g.id);return;}
+  const rt=e.target.closest('[data-root]'); if(rt){inspectRoot(rt.dataset.root);return;}
+  const nd=e.target.closest('[data-node]'); if(nd){inspectNode(nd.dataset.node);return;}
+});
+
+/* panels / census / foot */
+document.getElementById('negatives').innerHTML=(D.negatives||[]).map(n=>`<li>${esc(n)}</li>`).join('');
+document.getElementById('tests').innerHTML=(D.tests||[]).map(t=>`<div class="test"><div class="t">${t.rank?`<span class="rank">${esc(t.rank)}</span>`:''}${esc(t.test)}</div><div class="d">${esc(t.decides)}</div></div>`).join('');
+const cs=D.census||{};const order=[["measured","MEASURED","--k-meas"],["inference","INFERENCE","--k-inf"],["hypothesis","HYPOTHESIS","--k-hyp"],["instance","INSTANCE","--k-inst"],["claim","CLAIM","--k-claim"],["external","EXTERNAL","--k-ext"]].filter(o=>cs[o[0]]>0);
+const csTot=order.reduce((a,o)=>a+(cs[o[0]]||0),0)||1; /* normalize defensively — converge sometimes emits raw counts, not fractions */
+document.getElementById('census').innerHTML=`<h4>Answer-kind census</h4><div class="census-bar">${order.map(o=>`<span style="flex:${cs[o[0]]};background:var(${o[2]})"></span>`).join('')}</div><div class="census-key">${order.map(o=>`<span><i style="background:var(${o[2]})"></i>${o[1]} ${Math.round(cs[o[0]]/csTot*100)}%</span>`).join('')}</div>${cs.bottomLine?`<div class="bottom">${esc(cs.bottomLine)}</div>`:''}`;
+document.getElementById('foot').textContent=`Why Tree · ${p.method||'Goldratt CRT'} · spine = decide, rail = follow & validate · a map of where to look, not a verdict when evidence is thin.`;
+
+/* open on the answer (answer-first), constraint path lit */
+inspectConstraint();
+</script>
+</body>
+</html>

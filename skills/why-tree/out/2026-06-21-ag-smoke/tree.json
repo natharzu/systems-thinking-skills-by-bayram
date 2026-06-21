@@ -1,0 +1,188 @@
+{
+  "apex": "Most personal OKRs get abandoned by week 3.",
+  "verdict": "Personal OKRs fail by week 3 because they are framed as abstract lagging outcomes without establishing event-based tracking habits and calendar review rituals.",
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Stage 1 · Set",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S1_N_merged",
+          "text": "OKRs are framed as abstract lagging outcomes without concrete trigger-action cues, leaving users with no measurable progress to track in the first few weeks.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Gollwitzer (1999) 'Implementation Intentions' & skills/why-tree/test-cases.md Case 1 & Case 2",
+          "children": []
+        },
+        {
+          "id": "S1_N3",
+          "text": "The emotional incentive is heavily front-loaded in the goal-setting phase because the act of planning simulates goal completion and releases dopamine, satisfying motivation before execution begins.",
+          "kind": "HYPOTHESIS",
+          "grade": "Mod",
+          "role": "",
+          "cite": "Goal-setting theory and dopamine reward dynamics",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Stage 2 · Track",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S2_N_merged",
+          "text": "Weekly tracking processes require manual high-friction reflection and updates that exhaust willpower because the tracking behavior is not integrated into existing daily workflows.",
+          "kind": "HYPOTHESIS",
+          "grade": "Mod",
+          "role": "",
+          "cite": "BJ Fogg 'Tiny Habits' behavior design & Goal tracking UX research",
+          "children": []
+        },
+        {
+          "id": "S2_N2",
+          "text": "Personal OKRs lack external social accountability and reputational stakes because they are kept private, meaning there is no negative consequence or social cost for abandoning them.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "",
+          "cite": "Behavioral economics commitment devices",
+          "children": []
+        },
+        {
+          "id": "S2_N_discounting",
+          "text": "Personal OKRs rely on delayed outcome rewards and fail to align long-term goals with immediate incentives, leading to temporal discounting where short-term demands consistently override delayed benefits.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Charles Duhigg 'The Power of Habit' & Temporal discounting and reward structures",
+          "children": []
+        },
+        {
+          "id": "refuted_tool_willpower",
+          "text": "Willpower exhaustion and tracking tool complexity are the primary bottlenecks to OKR completion.",
+          "kind": "CLAIM",
+          "grade": "Mod",
+          "role": "REFUTED",
+          "cite": "Refutation evidence: users fail even when using simple text files/spreadsheets or high willpower, indicating a process/habit structure constraint, not tool overhead or effort.",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Stage 3 · Review",
+      "crosscut": false,
+      "nodes": [
+        {
+          "id": "S3_N2",
+          "text": "No recurring review ritual is scheduled on the calendar because goal reviews are treated as ad-hoc, low-priority tasks rather than non-negotiable calendar commitments.",
+          "kind": "HYPOTHESIS",
+          "grade": "Weak",
+          "role": "",
+          "cite": "skills/why-tree/tests/fixtures/minimal.json",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Personal OKR design relies on a policy of framing goals as abstract lagging outcomes without establishing habit cues or scheduled review rituals.",
+      "from": [
+        "S1_N_merged",
+        "S2_N_merged",
+        "S3_N2"
+      ],
+      "action": "Define goals as weekly behavioral lead metrics with explicit trigger-action plans and calendar-blocked review rituals.",
+      "isConstraint": true,
+      "children": [
+        {
+          "id": "R0_L1",
+          "text": "Goals are framed as abstract lagging outcomes without concrete trigger-action cues because the goal-setting process focuses on defining long-term aspirations rather than designing weekly behavioral habits.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "Gollwitzer (1999) 'Implementation Intentions'",
+          "children": [
+            {
+              "id": "R0_L2",
+              "text": "The goal-setting process focuses on aspirations rather than habits because users mistake the emotional satisfaction of planning for actual progress.",
+              "kind": "HYPOTHESIS",
+              "grade": "Mod",
+              "role": "",
+              "cite": "Goal-setting theory and dopamine reward dynamics",
+              "children": [
+                {
+                  "id": "R0_L3",
+                  "text": "Users mistake planning satisfaction for progress because the human brain naturally releases dopamine upon formulating a goal, reducing the immediate cognitive tension and urgency needed to build execution habits.",
+                  "kind": "EXTERNAL",
+                  "grade": "Strong",
+                  "role": "",
+                  "cite": "Neurobiology of anticipation and reward projection",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R1",
+      "title": "Personal OKRs lack external social accountability and reputational consequences, making abandonment cost-free.",
+      "from": [
+        "S2_N2"
+      ],
+      "action": "Implement commitment devices (e.g., social contracts or public stakes) to introduce social costs for abandonment.",
+      "isConstraint": false,
+      "children": []
+    },
+    {
+      "id": "R2",
+      "title": "Personal OKRs create a dopamine asymmetry where motivation is front-loaded in goal setting while tracking relies on delayed long-term rewards.",
+      "from": [
+        "S1_N3",
+        "S2_N_discounting"
+      ],
+      "action": "Design immediate intrinsic rewards or gamified micro-incentives into the weekly tracking ritual.",
+      "isConstraint": false,
+      "children": []
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "The primary system constraint is the policy of framing OKRs as abstract lagging outcomes without establishing event-based habit cues or calendar-blocked review rituals.",
+    "unlocated": "No unlocated constraint; the policy constraint is located and requires process/behavior changes.",
+    "loadBearing": "R0_L2",
+    "ifFalse": "If users do not mistake planning satisfaction for progress, the constraint shifts to Root R2 (dopamine asymmetry and lack of immediate incentives)."
+  },
+  "negatives": [
+    "Forcing users to use complex OKR tracking software with rigid daily update reminders, which increases cognitive friction and accelerates abandonment due to tool fatigue.",
+    "Adding public shaming or severe negative consequences for missing personal goals, which causes users to set extremely low, unchallenging OKRs to guarantee safety."
+  ],
+  "tests": [
+    {
+      "test": "Implement a 2-week trial where users set OKRs but are randomly assigned to either define event-based habit cues (implementation intentions) or standard outcome goals.",
+      "decides": "Adjudicates whether explicit trigger-action cues significantly reduce week-3 abandonment rates compared to standard outcome framing (adjudicates R0_L1).",
+      "rank": "#1"
+    },
+    {
+      "test": "Survey users post-goal-setting to measure self-reported motivation levels, then track their weekly login/update frequency.",
+      "decides": "Adjudicates whether front-loaded dopamine/emotional satisfaction in planning correlates with earlier abandonment (adjudicates R0_L2).",
+      "rank": "#2"
+    }
+  ],
+  "census": {
+    "measured": 0.0,
+    "inference": 0.4,
+    "hypothesis": 0.4,
+    "instance": 0.0,
+    "claim": 0.1,
+    "external": 0.1,
+    "bottomLine": "The analysis contains 40% INFERENCE and 40% HYPOTHESIS, with no direct MEASURED data on this specific cohort. The system constraint is located, but its load-bearing support (R0_L2) remains a HYPOTHESIS. Thus, this is a map of where to test, rather than a final settled verdict."
+  }
+}

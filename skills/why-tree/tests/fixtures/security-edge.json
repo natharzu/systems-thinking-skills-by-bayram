@@ -22,7 +22,7 @@
               "kind": "INFERENCE",
               "grade": "Strong",
               "role": "LEVER",
-              "cite": "PRODUCTION-RIGOR.md",
+              "cite": "doc:skills/why-tree/PRODUCTION-RIGOR.md",
               "children": []
             }
           ]

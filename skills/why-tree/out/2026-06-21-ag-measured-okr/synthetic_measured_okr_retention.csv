@@ -1,0 +1,5 @@
+cohort,goal_design,n_users,week1_active,week2_active,week3_active,week4_active,weekly_review_scheduled,explicit_trigger_action_cue
+A,standard_outcome_okr,50,44,31,18,14,8,5
+B,event_based_habit_cue_okr,50,46,39,33,29,38,41
+C,standard_outcome_okr_with_tool_reminders,50,43,30,19,15,10,6
+D,public_accountability_okr,50,45,36,28,24,22,15

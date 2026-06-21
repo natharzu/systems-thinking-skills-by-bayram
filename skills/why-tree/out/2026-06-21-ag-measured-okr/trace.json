@@ -1,0 +1,86 @@
+{
+  "run_id": "2026-06-21-ag-measured-okr",
+  "depth": "smoke",
+  "sources": [
+    "skills/why-tree/out/2026-06-21-ag-measured-okr/synthetic_measured_okr_retention.csv"
+  ],
+  "caps": {
+    "max_lens_agents": 3,
+    "max_deepen_levels": 1,
+    "max_refute_votes": 1
+  },
+  "raw_branches": [
+    {
+      "text": "Cohort A (standard outcome OKR) week 3 retention drops to 36% (18/50) vs Cohort B (habit cue OKR) which stays at 66% (33/50).",
+      "stage": "Stage 1 · Goal Setting",
+      "kind": "MEASURED",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    },
+    {
+      "text": "Cohort C (tool reminders) achieves 38% week 3 retention (19/50), showing reminders do not improve outcome retention compared to standard outcome OKRs (Cohort A).",
+      "stage": "Stage 1 · Goal Setting",
+      "kind": "MEASURED",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    },
+    {
+      "text": "Trigger-action cues and review scheduling are strongly adopted in the successful Cohort B.",
+      "stage": "Stage 2 · Habit Building",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    }
+  ],
+  "deduped_branches": [
+    {
+      "id": "node_m1",
+      "text": "Cohort A (standard outcome goals) drops to 36% week 3 retention (n=50, Mar-Apr), whereas Cohort B (habit cue goals) maintains 66% retention (n=50).",
+      "stage": "Stage 1 · Goal Setting",
+      "kind": "MEASURED",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    },
+    {
+      "id": "node_m2",
+      "text": "Cohort C (tool reminders) achieves only 38% week 3 retention (n=50), indicating that push notifications do not bypass the habit constraint.",
+      "stage": "Stage 1 · Goal Setting",
+      "kind": "MEASURED",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    },
+    {
+      "id": "node_inf1",
+      "text": "Writing explicit trigger-action cues (82% in Cohort B vs 10% in Cohort A) strongly correlates with increased OKR retention.",
+      "stage": "Stage 2 · Habit Building",
+      "kind": "INFERENCE",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    }
+  ],
+  "load_bearing_sent_to_refute": [
+    {
+      "id": "node_m2",
+      "text": "Cohort C (tool reminders) achieves only 38% week 3 retention (n=50), indicating that push notifications do not bypass the habit constraint.",
+      "kind": "MEASURED",
+      "grade": "Strong",
+      "cite": "synthetic_measured_okr_retention.csv"
+    }
+  ],
+  "refutations": [
+    {
+      "id": "node_m2",
+      "status": "REFUTED",
+      "evidence": "Cohort C retention (38%) matches Cohort A baseline (36%), refuting the hypothesis that software tool reminders are the primary lever for habit automation."
+    }
+  ],
+  "agent_count": 2,
+  "tool_calls_count": 4,
+  "duration_ms": 38000,
+  "evidence_census": {
+    "measured_count": 2,
+    "inference_count": 1,
+    "hypothesis_count": 1,
+    "measured_source": "synthetic_measured_okr_retention.csv"
+  }
+}

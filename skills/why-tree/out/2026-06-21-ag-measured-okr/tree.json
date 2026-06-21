@@ -1,0 +1,95 @@
+{
+  "apex": "Most personal OKRs get abandoned by week 3.",
+  "verdict": "Verdict: Event-based habit cues show 66% week 3 retention vs 36% for standard outcome OKRs; tool reminders (38%) do not resolve the habit constraint.",
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Stage 1 · Goal Setting",
+      "nodes": [
+        {
+          "id": "node_m1",
+          "text": "Cohort A (standard outcome goals) drops to 36% week 3 retention (n=50, Mar-Apr), whereas Cohort B (habit cue goals) maintains 66% retention (n=50).",
+          "kind": "MEASURED",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "synthetic_measured_okr_retention.csv",
+          "children": []
+        },
+        {
+          "id": "node_m2",
+          "text": "Cohort C (tool reminders) achieves only 38% week 3 retention (n=50), indicating that push notifications do not bypass the habit constraint.",
+          "kind": "MEASURED",
+          "grade": "Strong",
+          "role": "REFUTED",
+          "cite": "synthetic_measured_okr_retention.csv",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Stage 2 · Habit Building",
+      "nodes": [
+        {
+          "id": "node_inf1",
+          "text": "Writing explicit trigger-action cues (82% in Cohort B vs 10% in Cohort A) strongly correlates with increased OKR retention.",
+          "kind": "INFERENCE",
+          "grade": "Strong",
+          "role": "LEVER",
+          "cite": "synthetic_measured_okr_retention.csv",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "roots": [
+    {
+      "id": "R0",
+      "title": "Setting OKRs as outcomes without establishing habit triggers or calendar review slots (POLICY constraint)",
+      "from": [
+        "node_m1",
+        "node_inf1"
+      ],
+      "action": "Require users to write event-based trigger-action cues and schedule recurring calendar review slots.",
+      "isConstraint": true,
+      "children": [
+        {
+          "id": "R0_L1",
+          "text": "Users fail to track goals because they lack a concrete mental association between a routine event and the tracking action.",
+          "kind": "HYPOTHESIS",
+          "grade": "Mod",
+          "role": "",
+          "cite": "Habit design literature",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "constraint": {
+    "rootId": "R0",
+    "type": "policy",
+    "statement": "Lack of event-based triggers and scheduled reviews in goal design.",
+    "unlocated": "",
+    "loadBearing": "R0_L1",
+    "ifFalse": "If cognitive triggers are not the constraint, the constraint shifts to social accountability (Cohort D)."
+  },
+  "negatives": [
+    "Deploying automated push notifications (Cohort C), which fail to establish internal tracking habits and increase tool fatigue."
+  ],
+  "tests": [
+    {
+      "test": "Conduct an A/B test with three groups: Group 1 (Habit cues only), Group 2 (Review slots only), Group 3 (Both).",
+      "decides": "Isolates the independent impact of habit-cue triggers vs scheduled calendar reviews on retention.",
+      "rank": "#1"
+    }
+  ],
+  "census": {
+    "measured": 0.5,
+    "inference": 0.3,
+    "hypothesis": 0.2,
+    "instance": 0.0,
+    "claim": 0.0,
+    "external": 0.0,
+    "bottomLine": "This is a data-grounded tree. 50% of the nodes are MEASURED from cohort outcomes."
+  }
+}
